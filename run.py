@@ -9,9 +9,9 @@ from learning import SoftmaxUser, TrueBelief
 from learning import PreferenceQuery, Preference, FullRankingQuery, FullRanking, WeakComparisonQuery, WeakComparison
 from assessing import cosine_similarity
 
-optimization_method = 'exhaustive_search'  # options: exhaustive_search, greedy, medoids, boundary_medoids, successive_elimination, dpp
-batch_size = 1
-acquisition_function = 'volume_removal' # options: mutual_information, volume_removal, disagreement, regret, random, thompson
+optimization_method = 'successive_elimination'  # options: exhaustive_search, greedy, medoids, boundary_medoids, successive_elimination, dpp
+batch_size = 4
+acquisition_function = 'mutual_information' # options: mutual_information, volume_removal, disagreement, regret, random, thompson
 log_prior_belief = uniform_logprior
 # Method-specific parameters:
 distance_metric_for_batch_generation = default_query_distance # all methods default to default_query_distance, so no need to specify
@@ -31,7 +31,7 @@ def feature_func(traj: List[Tuple[np.array, np.array]]) -> np.array:
     
     states = np.array([pair[0] for pair in traj])
     actions = np.array([pair[1] for pair in traj])
-    return np.random.randn(9,) # so that we don't get correlations between the features
+    return np.random.randn(4,) # so that we don't get correlations between the features
 
 gym_env = gym.make('MountainCarContinuous-v0')
 env = Environment(gym_env, feature_func)
@@ -57,10 +57,11 @@ current_params = {'omega': util_funs.get_random_normalized_vector(features_dim)}
 user_model = SoftmaxUser(current_params)
 
 dataset = []
-for query_no in range(30):
-    belief = TrueBelief(log_prior_belief, user_model, dataset, current_params,
-                        proposal_distribution = gaussian_proposal, num_samples = 100,
-                        burnin = 200, thin = 20)
+
+belief = TrueBelief(log_prior_belief, user_model, dataset, current_params, num_samples = 100,
+                    proposal_distribution = gaussian_proposal, burnin = 200, thin = 20)
+                    
+for query_no in range(10):
     cos_sim = cosine_similarity(belief, true_user)
     print('Cosine Similarity: ' + str(cos_sim))
     current_params = belief.mean
@@ -73,7 +74,9 @@ for query_no in range(30):
                                                          distance=default_query_distance)
     print('Objective Values: ' + str(objective_values))
     responses = true_user.respond(queries)
-    dataset.extend([Preference(query, response) for query, response in zip(queries, responses)])
+    
+    belief.update([Preference(query, response) for query, response in zip(queries, responses)])
+
 belief = TrueBelief(log_prior_belief, user_model, dataset, current_params,
                     proposal_distribution = gaussian_proposal, num_samples = 100,
                     burnin = 200, thin = 20)
