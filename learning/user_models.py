@@ -7,8 +7,11 @@ from learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQue
 from learning import QueryWithResponse, Demonstration, Preference, WeakComparison, FullRanking
 
 class User:
-    def __init__(self, params_dict: Dict):
-        self._params = params_dict.copy()
+    def __init__(self, params_dict: Dict = None):
+        if params_dict is not None:
+            self._params = params_dict.copy()
+        else:
+            self._params = {}
     
     @property
     def params(self):
@@ -31,7 +34,7 @@ class User:
         return np.exp(self.response_logprobabilities(query))
         
     def loglikelihood(self, data: QueryWithResponse) -> float:
-        logprobs = self.response_logprobabilities(query)
+        logprobs = self.response_logprobabilities(data)
         if isinstance(data, Preference) or isinstance(data, WeakComparison):
             idx = np.where(data.query.response_set == data.response)[0][0]
         elif isinstance(data, FullRanking):
@@ -47,9 +50,9 @@ class User:
         
     def likelihood_dataset(self, dataset: List[QueryWithResponse]) -> float:
         """Returns the (unnormalized) likelihood for the dataset under the conditional independence assumption."""
-        return np.exp(self.likelihood_dataset(dataset))
+        return np.exp(self.loglikelihood_dataset(dataset))
 
-    def respond(self, queries: Union[Query, List[Query]]) -> List:
+    def respond(self, queries: Union[Query, List[Query]], **kwargs) -> List:
         """Simulates the user's response to the given query."""
         if not isinstance(queries, list):
             queries = [queries]
@@ -135,3 +138,25 @@ class SoftmaxUser(User):
             
         raise NotImplementedError("User response model for the given data is not implemented.")
 
+
+class HumanUser(User):
+    def __init__(self):
+        """Initializes a softmax user object.
+        
+        Args:
+            params_dict: the parameters of the softmax user model, which are:
+                omega,  the weights of the linear reward function;
+                beta,   rationality coefficient for comparisons and rankings;
+                beta_D, rationality coefficient for demonstrations;
+                delta,  the perceivable difference parameter for weak comparison queries.
+        """
+        super(HumanUser, self).__init__()
+        
+    def respond(self, queries: Union[Query, List[Query]], **kwargs) -> List:
+        """Ask the queries to the user."""
+        if not isinstance(queries, list):
+            queries = [queries]
+        responses = []
+        for query in queries:
+            responses.append(query.visualize(**kwargs))
+        return responses

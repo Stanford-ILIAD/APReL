@@ -1,6 +1,7 @@
 from typing import Callable
 import gym
 
+
 class Environment:
     def __init__(self, env: gym.Env, feature_func: Callable):
         self.env = env
@@ -14,5 +15,8 @@ class Environment:
         
         # Mirror the render function only if it exists
         render_func = getattr(self.env, "render", None)
-        if callable(render_func):
-            self.render = self.env.render
+        self.render = self.env.render if callable(render_func) else None
+
+        # Mirror the set_state function only if it exists
+        set_state_func = getattr(self.env, "set_state", None)
+        self.set_state = self.env.set_state if callable(set_state_func) else None

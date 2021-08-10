@@ -16,6 +16,9 @@ class Query:
         
     def copy(self):
         return deepcopy(self)
+        
+    def visualize(self):
+        raise NotImplementedError
 
 
 class QueryWithResponse:
@@ -64,6 +67,19 @@ class PreferenceQuery(Query):
         self.K = self._slate.size
         self.response_set = np.arange(self.K)
         
+    def visualize(self, **kwargs) -> int:
+        """Visualizes a query and asks for a response."""
+        kwargs.setdefault('pause', 0.1)
+        for i in range(self.K):
+            print('Playing trajectory #' + str(i))
+            self.slate[i].visualize(kwargs['pause'])
+        selection = None
+        while selection is None:
+            selection = input('Which trajectory is the best? Enter a number: [0-' + str(self.K-1) + ']: ')
+            if not isinteger(selection) or int(selection) not in self.response_set:
+                selection = None
+        return int(selection)
+            
 
 class Preference(QueryWithResponse):
     def __init__(self, query: PreferenceQuery, response: int):
@@ -89,6 +105,18 @@ class WeakComparisonQuery(Query):
         self.K = self._slate.size
         self.response_set = np.array([-1,0,1])
 
+    def visualize(self, **kwargs) -> int:
+        """Visualizes a query and asks for a response."""
+        kwargs.setdefault('pause', 0.1)
+        for i in range(self.K):
+            print('Playing trajectory #' + str(i))
+            self.slate[i].visualize(kwargs['pause'])
+        selection = None
+        while selection is None:
+            selection = input('Which trajectory is the best? Enter a number (-1 for "About Equal"): ')
+            if not isinteger(selection) or int(selection) not in self.response_set:
+                selection = None
+        return int(selection)
 
 class WeakComparison(QueryWithResponse):
     def __init__(self, query: WeakComparisonQuery, response: int):
@@ -114,9 +142,45 @@ class FullRankingQuery(Query):
         self.K = self._slate.size
         self.response_set = np.array([list(tup) for tup in itertools.permutations(np.arange(self.K))])
 
+    def visualize(self, **kwargs) -> List[int]:
+        """Visualizes a query and asks for a response."""
+        kwargs.setdefault('pause', 0.1)
+        for i in range(self.K):
+            print('Playing trajectory #' + str(i))
+            self.slate[i].visualize(kwargs['pause'])
+        response = []
+        i = 1
+        while i < self.K:
+            selection = None
+            while selection is None:
+                selection = input('Which trajectory is your #' + str(i) + ' favorite? Enter a number [0-' + str(self.K-1) + ']: ')
+                if not isinteger(selection) or int(selection) < 0 or int(selection) >= self.K:
+                    selection = None
+                elif int(selection) in response:
+                    print('You have already chosen trajectory ' + selection + ' before!')
+                    selection = None
+            response.append(int(selection))
+            i += 1
+        remaining_id = np.setdiff1d(self.response_set, response)
+        response.append(remaining_id.item())
+        return np.array(response)
+
 
 class FullRanking(QueryWithResponse):
     def __init__(self, query: FullRankingQuery, response: List[int]):
         super(FullRanking, self).__init__(query)
         assert(response in self.query.response_set), 'Invalid response ' + str(response) + ' for the ranking query of size ' + str(self.query.K) + '.'
         self.response = response
+
+
+def isinteger(input: str) -> bool: # TODO: Should this go to utils?
+    """Returns whether input is an integer.
+    
+    Note: This function returns False if input is '3.0'
+    """
+    assert(isinstance(input, str)), 'Invalid input to the isinteger method. The input must be a string.'
+    try:
+        a = int(input)
+        return True
+    except:
+        return False

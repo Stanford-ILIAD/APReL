@@ -1,8 +1,12 @@
 from typing import List, Tuple, Union
 import numpy as np
+import time
 
 from basics import Environment
 
+# TODO: Currently, trajectory visualization relies on the existence of a set_state function in the environment, which is often not available.
+# This also causes actions to be not visualized. Instead, the simulator moves from state to state and renders in between.
+# Ideally, each trajectory should keep a visualization of the trajectory, e.g., a video. But it is computationally too costy to generate videos.
 
 class Trajectory:
     def __init__(self, env: Environment, trajectory: List[Tuple[np.array, np.array]]):
@@ -12,6 +16,21 @@ class Trajectory:
         
     def __getitem__(self, t: int) -> Tuple[np.array, np.array]:
         return self.trajectory[t]
+        
+    @property
+    def length(self):
+        return len(self.trajectory)
+        
+    def visualize(self, pause: float=0.0):
+        if self.env.set_state is not None and self.env.render is not None:
+            for t in range(self.length):
+                self.env.set_state(self.trajectory[t][0])
+                self.env.render()
+                time.sleep(pause)
+        else:
+            print('Either set_state or render function is missing from the environment. Printing the trajectory instead.')
+            #print(self.trajectory)
+            print('Features for this trajectory are: ' + str(self.features))
 
 
 class TrajectorySet:
