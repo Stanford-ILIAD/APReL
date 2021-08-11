@@ -12,13 +12,14 @@ from assessing import cosine_similarity
 optimization_method = 'successive_elimination'  # options: exhaustive_search, greedy, medoids, boundary_medoids, successive_elimination, dpp
 batch_size = 4
 acquisition_function = 'mutual_information' # options: mutual_information, volume_removal, disagreement, regret, random, thompson
+max_episode_length = 100
 log_prior_belief = uniform_logprior
 # Method-specific parameters:
 distance_metric_for_batch_generation = default_query_distance # all methods default to default_query_distance, so no need to specify
 reduced_size_for_batch_generation = 100
 gamma_for_dpp = 1
 # Parameters for human user:
-visualization_pause_between_states = 0.1
+headless = False
 
 
 def feature_func(traj: List[Tuple[np.array, np.array]]) -> np.array:
@@ -32,7 +33,7 @@ def feature_func(traj: List[Tuple[np.array, np.array]]) -> np.array:
     """
     
     states = np.array([pair[0] for pair in traj])
-    actions = np.array([pair[1] for pair in traj])
+    actions = np.array([pair[1] for pair in traj[:-1]])
     return np.random.randn(4,) # so that we don't get correlations between the features
 
 gym_env = gym.make('MountainCarContinuous-v0')
@@ -40,8 +41,8 @@ env = Environment(gym_env, feature_func)
 
 
 np.random.seed(0)
-trajectory_set = generate_trajectories(env, num_trajectories = 40, file_name = 'trajectory_set.pkl',
-                                       save = True, restore = False)
+trajectory_set = generate_trajectories(env, num_trajectories=40, max_episode_length=max_episode_length,
+                                       file_name='mountaincar', restore=False, headless=headless)
                                        
 # Initialize a dummy query. The optimizer will then find the optimal query of the same kind.
 query = WeakComparisonQuery(trajectory_set[:2])
@@ -78,7 +79,7 @@ for query_no in range(10):
                                                          gamma=gamma_for_dpp,
                                                          distance=default_query_distance)
     print('Objective Values: ' + str(objective_values))
-    responses = true_user.respond(queries, pause=visualization_pause_between_states)
+    responses = true_user.respond(queries)
     
     belief.update([Preference(query, response) for query, response in zip(queries, responses)])
 

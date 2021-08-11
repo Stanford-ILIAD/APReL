@@ -52,7 +52,7 @@ class User:
         """Returns the (unnormalized) likelihood for the dataset under the conditional independence assumption."""
         return np.exp(self.loglikelihood_dataset(dataset))
 
-    def respond(self, queries: Union[Query, List[Query]], **kwargs) -> List:
+    def respond(self, queries: Union[Query, List[Query]]) -> List:
         """Simulates the user's response to the given query."""
         if not isinstance(queries, list):
             queries = [queries]
@@ -141,22 +141,14 @@ class SoftmaxUser(User):
 
 class HumanUser(User):
     def __init__(self):
-        """Initializes a softmax user object.
-        
-        Args:
-            params_dict: the parameters of the softmax user model, which are:
-                omega,  the weights of the linear reward function;
-                beta,   rationality coefficient for comparisons and rankings;
-                beta_D, rationality coefficient for demonstrations;
-                delta,  the perceivable difference parameter for weak comparison queries.
-        """
+        """Initializes a human user object."""
         super(HumanUser, self).__init__()
         
-    def respond(self, queries: Union[Query, List[Query]], **kwargs) -> List:
+    def respond(self, queries: Union[Query, List[Query]]) -> List:
         """Ask the queries to the user."""
         if not isinstance(queries, list):
             queries = [queries]
         responses = []
         for query in queries:
-            responses.append(query.visualize(**kwargs))
+            responses.append(query.visualize())
         return responses

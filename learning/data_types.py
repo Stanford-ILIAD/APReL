@@ -67,12 +67,11 @@ class PreferenceQuery(Query):
         self.K = self._slate.size
         self.response_set = np.arange(self.K)
         
-    def visualize(self, **kwargs) -> int:
+    def visualize(self) -> int:
         """Visualizes a query and asks for a response."""
-        kwargs.setdefault('pause', 0.1)
         for i in range(self.K):
             print('Playing trajectory #' + str(i))
-            self.slate[i].visualize(kwargs['pause'])
+            self.slate[i].visualize()
         selection = None
         while selection is None:
             selection = input('Which trajectory is the best? Enter a number: [0-' + str(self.K-1) + ']: ')
@@ -105,12 +104,11 @@ class WeakComparisonQuery(Query):
         self.K = self._slate.size
         self.response_set = np.array([-1,0,1])
 
-    def visualize(self, **kwargs) -> int:
+    def visualize(self) -> int:
         """Visualizes a query and asks for a response."""
-        kwargs.setdefault('pause', 0.1)
         for i in range(self.K):
             print('Playing trajectory #' + str(i))
-            self.slate[i].visualize(kwargs['pause'])
+            self.slate[i].visualize()
         selection = None
         while selection is None:
             selection = input('Which trajectory is the best? Enter a number (-1 for "About Equal"): ')
@@ -142,12 +140,11 @@ class FullRankingQuery(Query):
         self.K = self._slate.size
         self.response_set = np.array([list(tup) for tup in itertools.permutations(np.arange(self.K))])
 
-    def visualize(self, **kwargs) -> List[int]:
+    def visualize(self) -> List[int]:
         """Visualizes a query and asks for a response."""
-        kwargs.setdefault('pause', 0.1)
         for i in range(self.K):
             print('Playing trajectory #' + str(i))
-            self.slate[i].visualize(kwargs['pause'])
+            self.slate[i].visualize()
         response = []
         i = 1
         while i < self.K:

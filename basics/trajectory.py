@@ -1,18 +1,18 @@
 from typing import List, Tuple, Union
-import numpy as np
 import time
+import numpy as np
+from moviepy.editor import VideoFileClip
+from matplotlib import animation
+import matplotlib.pyplot as plt
 
 from basics import Environment
 
-# TODO: Currently, trajectory visualization relies on the existence of a set_state function in the environment, which is often not available.
-# This also causes actions to be not visualized. Instead, the simulator moves from state to state and renders in between.
-# Ideally, each trajectory should keep a visualization of the trajectory, e.g., a video. But it is computationally too costy to generate videos.
 
 class Trajectory:
-    def __init__(self, env: Environment, trajectory: List[Tuple[np.array, np.array]]):
-        self.env = env
+    def __init__(self, env: Environment, trajectory: List[Tuple[np.array, np.array]], clip_path = None):
         self.trajectory = trajectory
         self.features = env.features(trajectory)
+        self.clip_path = clip_path
         
     def __getitem__(self, t: int) -> Tuple[np.array, np.array]:
         return self.trajectory[t]
@@ -21,14 +21,12 @@ class Trajectory:
     def length(self):
         return len(self.trajectory)
         
-    def visualize(self, pause: float=0.0):
-        if self.env.set_state is not None and self.env.render is not None:
-            for t in range(self.length):
-                self.env.set_state(self.trajectory[t][0])
-                self.env.render()
-                time.sleep(pause)
+    def visualize(self):
+        if self.clip_path is not None:
+            clip = VideoFileClip(self.clip_path)
+            clip.preview(fps=25)
         else:
-            print('Either set_state or render function is missing from the environment. Printing the trajectory instead.')
+            print('Headless mode is on. Printing the trajectory information.')
             #print(self.trajectory)
             print('Features for this trajectory are: ' + str(self.features))
 
