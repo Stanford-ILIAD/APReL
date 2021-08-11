@@ -1,3 +1,6 @@
+"""
+This file contains classes which have functions to generate queries to ask the expert.
+"""
 from typing import Callable, List, Tuple
 import itertools
 import numpy as np
@@ -22,6 +25,10 @@ class QueryOptimizer:
 
 
 class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
+    """
+    This class inherits from the query optimizer class, but contains functions that assume the set of possible
+    trajectories is discrete.
+    """
     def __init__(self, trajectory_set: TrajectorySet):
         super(QueryOptimizerDiscreteTrajectorySet, self).__init__()
         self.trajectory_set = trajectory_set
@@ -30,6 +37,9 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
         return np.asscalar(np.argmax(np.dot(self.trajectory_set.features_matrix, omega)))
 
     def planner(self, omega: np.array) -> Trajectory:
+        """
+        Returns the Trajectory in trajectory_set with maximum reward, given a set of weights omega.
+        """
         return self.trajectory_set[self.argplanner(omega)]
         
     def optimize(self,
@@ -39,6 +49,19 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                  batch_size: int = 1,
                  optimization_method: str = 'exhaustive_search',
                  **kwargs) -> Tuple[List[Query], np.array]:
+        """
+        This function generates the optimal batch of queries to ask next.
+        Args:
+            acquisition_func_str: the name of the acquisition function used to decide the value of each query
+            belief: the current belief distribution over omega
+            initial_query: an initial query to start exploration from
+            batch_size: the number of queries to return
+            optimization_method:  the name of the method used to select queries
+            **kwargs: extra arguments needed, for specific optimization methods or acquisition functions
+
+        Returns: a batch of queries, and the acquisition function values for those queriess
+
+        """
         assert(acquisition_func_str in self.acquisition_functions), 'Unknown acquisition function.'
         acquisition_func = self.acquisition_functions[acquisition_func_str]
         
@@ -71,6 +94,17 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                           belief: Belief,
                           initial_query: Query,
                           **kwargs) -> Tuple[List[Query], np.array]:
+        """
+        This function searches over the possible queries to find the singuar most optimal option.
+        Args:
+            acquisition_func: the name of the acquisition function used to decide the value of each query
+            belief: the current belief distribution over omega
+            initial_query: an initial query to start exploration from
+            **kwargs: extra arguments needed for specific acquisition functions
+
+        Returns: a batch (of size 1) of queries, and the acquisition function values of those queries
+
+        """
         return self.greedy_batch(acquisition_func, belief, initial_query, batch_size=1, **kwargs)
 
     def greedy_batch(self,
@@ -79,6 +113,18 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                      initial_query: Query,
                      batch_size: int,
                      **kwargs) -> Tuple[List[Query], np.array]:
+        """
+        Uses the greedy method to find a batch of queries by selecting the batch_size most optimal queries.
+        Args:
+            acquisition_func: the name of the acquisition function used to decide the value of each query
+            belief: the current belief distribution over omega
+            initial_query: an initial query to start exploration from
+            batch_size: the number of queries to return
+            **kwargs: extra arguments needed for specific acquisition functions
+
+        Returns: a batch of queries, and the acquisition function values of those queries
+
+        """
         if isinstance(initial_query, PreferenceQuery) or isinstance(initial_query, WeakComparisonQuery) or isinstance(initial_query, FullRankingQuery):
             if acquisition_func is random:
                 best_batch = [initial_query.copy() for _ in range(batch_size)]
@@ -171,6 +217,20 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                      initial_query: Query,
                      batch_size: int,
                      **kwargs) -> Tuple[List[Query], np.array]:
+        """
+        Uses the medoids method to find a batch of queries to also optimize for query diversity.
+
+        Args:
+            acquisition_func: the name of the acquisition function used to decide the value of each query
+            belief: the current belief distribution over omega
+            initial_query: an initial query to start exploration from
+            batch_size: the number of queries to return
+            **kwargs: the (optional) size of the reduced sample space and (optional) distance metric,
+                      plus extra arguments needed for specific acquisition or distance functions
+
+        Returns: a batch of queries, and the acquisition function values of those queries
+
+        """
         kwargs.setdefault('reduced_size', 100)
         kwargs.setdefault('distance', default_query_distance)
         top_queries, vals = self.greedy_batch(acquisition_func, belief, initial_query, batch_size=kwargs['reduced_size'], **kwargs)
@@ -185,6 +245,20 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                                initial_query: Query,
                                batch_size: int,
                                **kwargs) -> Tuple[List[Query], np.array]:
+        """
+        Uses the boundary medoids method to find a batch of queries to also optimize for query diversity.
+
+        Args:
+            acquisition_func: the name of the acquisition function used to decide the value of each query
+            belief: the current belief distribution over omega
+            initial_query: an initial query to start exploration from
+            batch_size: the number of queries to return
+            **kwargs: the (optional) size of the reduced sample space and (optional) distance metric,
+                      plus extra arguments needed for specific acquisition or distance functions
+
+        Returns: a batch of queries, and the acquisition function values of those queries
+
+        """
         kwargs.setdefault('reduced_size', 100)
         kwargs.setdefault('distance', default_query_distance)
         top_queries, vals = self.greedy_batch(acquisition_func, belief, initial_query, batch_size=kwargs['reduced_size'], **kwargs)
@@ -218,6 +292,20 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                                      initial_query: Query,
                                      batch_size: int,
                                      **kwargs) -> Tuple[List[Query], np.array]:
+        """
+        Uses the successive elimination method to find a batch of queries to also optimize for query diversity.
+
+        Args:
+            acquisition_func: the name of the acquisition function used to decide the value of each query
+            belief: the current belief distribution over omega
+            initial_query: an initial query to start exploration from
+            batch_size: the number of queries to return
+            **kwargs: the (optional) size of the reduced sample space and (optional) distance metric,
+                      plus extra arguments needed for specific acquisition or distance functions
+
+        Returns: a batch of queries, and the acquisition function values of those queries
+
+        """
         kwargs.setdefault('reduced_size', 100)
         kwargs.setdefault('distance', default_query_distance)
         top_queries, vals = self.greedy_batch(acquisition_func, belief, initial_query, batch_size=kwargs['reduced_size'], **kwargs)
@@ -247,6 +335,20 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                   initial_query: Query,
                   batch_size: int,
                   **kwargs) -> Tuple[List[Query], np.array]:
+        """
+        Uses the DPP method to find a batch of queries to also optimize for query diversity.
+
+        Args:
+            acquisition_func: the name of the acquisition function used to decide the value of each query
+            belief: the current belief distribution over omega
+            initial_query: an initial query to start exploration from
+            batch_size: the number of queries to return
+            **kwargs: the (optional) size of the reduced sample space, distance metric, and gamma,
+                      plus extra arguments needed for specific acquisition or distance functions
+
+        Returns: a batch of queries, and the acquisition function values of those queries
+
+        """
         kwargs.setdefault('reduced_size', 100)
         kwargs.setdefault('distance', default_query_distance)
         kwargs.setdefault('gamma', 1.)

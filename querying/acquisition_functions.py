@@ -1,3 +1,7 @@
+"""
+This file contains the possible acquisition functions that determine the value of each possible query,
+to help in selecting the optimal queries.
+"""
 from typing import List, Dict
 import numpy as np
 
@@ -6,6 +10,17 @@ from learning import Belief, TrueBelief
 from learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQuery
 
 def mutual_information(belief: Belief, query: Query, **kwargs) -> float:
+    """
+    This function returns the mutual information for a given query,
+    using a sample over the belief for omega.
+    Args:
+        belief: the current belief (probability distribution) over the reward weights
+        query: a query to ask the user, consisting of trajectories to compare
+        **kwargs: none used currently
+
+    Returns: the mutual information for the query
+
+    """
     if isinstance(belief, TrueBelief):
         user = belief.user_model.copy()
         probs = []
@@ -20,6 +35,17 @@ def mutual_information(belief: Belief, query: Query, **kwargs) -> float:
 
 
 def volume_removal(belief: Belief, query: Query, **kwargs) -> float:
+    """
+    This function returns the expected volume removed from the sample space for omega,
+    after the query is answered.
+    Args:
+        belief: the current belief (probability distribution) over the reward weights
+        query: a query to ask the user, consisting of trajectories to compare
+        **kwargs: none used currently
+
+    Returns: the expected volume removal for the given query
+
+    """
     if isinstance(belief, TrueBelief):
         user = belief.user_model.copy()
         probs = []

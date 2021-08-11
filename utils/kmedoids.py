@@ -3,6 +3,19 @@ import random
 
 
 def kMedoids(D, k, tmax=100):
+    """
+    For the medoids and boundary medoids methods of generating queries,
+    this function divides the (discrete) space of optimal queries into k clusters,
+    and then selects the medoid from each cluster.
+    Args:
+        D: a distance matrix, where D[a][b] is the distance between queries a and b
+        k: the number of queries to return
+        tmax: the maximum number of steps to take in forming clusters
+
+    Returns:
+        M: the indices of the k selected queries
+        C:
+    """
     # determine dimensions of distance matrix D
     m, n = D.shape
 

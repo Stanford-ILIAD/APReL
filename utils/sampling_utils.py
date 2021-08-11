@@ -1,7 +1,20 @@
+"""
+This file contains functions that are useful for learning the weights on the reward function
+(see the learning folder)
+"""
 from typing import Dict
 import numpy as np
 
 def uniform_logprior(params: Dict) -> float:
+    """
+    This is a prior over the belief function for omega, which is uniformly distributed over the unit sphere.
+    Args:
+        params: a dictionary which contains a possible omega
+
+    Returns: the (unnormalized) log probability of omega, which is 0 (as 0 = log 1) if omega is in the unit sphere,
+            and -infty otherwise
+
+    """
     if np.linalg.norm(params['omega']) <= 1:
         return 0.
     return -np.inf

@@ -1,3 +1,6 @@
+"""
+This file contains functions useful for the DPP method of generating a diverse batch of optimal queries.
+"""
 import numpy as np
 from scipy.spatial.distance import cdist, pdist, squareform
 

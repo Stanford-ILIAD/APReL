@@ -8,6 +8,18 @@ def generate_trajectories(env: Environment,
                           file_name: str = None,
                           save: bool = True,
                           restore: bool = False) -> TrajectorySet:
+    """
+    Generates num_trajectories random trajectories, or loads them from the given file.
+    Args:
+        env: an Environment, which is a class containing an OpenAI Gym environment and a features function
+        num_trajectories: the number of trajectories to generate
+        file_name: the file name
+        save: if true, will save the trajectories to file_name
+        restore: if true, will first try to load the trajectories from file_name
+
+    Returns: a TrajectorySet of num_trajectories trajectories
+
+    """
     assert(not (file_name is None and restore)), 'Trajectory set cannot be restored, because no file_name is given.'
     assert(not (file_name is None and save)), 'Trajectory set cannot be saved, because no file_name is given.'
     if restore:
