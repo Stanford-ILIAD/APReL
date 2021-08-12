@@ -25,6 +25,7 @@ class Trajectory:
         if self.clip_path is not None:
             clip = VideoFileClip(self.clip_path)
             clip.preview(fps=25)
+            clip.close()
         else:
             print('Headless mode is on. Printing the trajectory information.')
             #print(self.trajectory)

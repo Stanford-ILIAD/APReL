@@ -56,8 +56,8 @@ def main(args):
     current_params = {'omega': util_funs.get_random_normalized_vector(features_dim)}
     user_model = SoftmaxUser(current_params)
 
-    belief = TrueBelief(log_prior_belief, user_model, [], current_params, num_samples=100,
-                        proposal_distribution=gaussian_proposal, burnin=200, thin=20)
+    belief = TrueBelief(args['log_prior_belief'], user_model, [], current_params,
+                        num_samples=100, proposal_distribution=gaussian_proposal, burnin=200, thin=20)
     print('Estimated user parameters: ' + str(belief.mean))
     if args['simulate']:
         cos_sim = cosine_similarity(belief, true_user)
