@@ -29,8 +29,12 @@ def generate_trajectories(env: Environment,
     assert(not (file_name is None and restore)), 'Trajectory set cannot be restored, because no file_name is given.'
     max_episode_length = np.inf if max_episode_length is None else max_episode_length
     if restore:
-        with open('data/' + file_name + '.pkl', 'rb') as f:
-            trajectories = pickle.load(f)
+        try:
+            with open('data/' + file_name + '.pkl', 'rb') as f:
+                trajectories = pickle.load(f)
+        except:
+            warnings.warn('Ignoring restore=True, because \'data/' + file_name + '.pkl\' is not found.')
+            trajectories = TrajectorySet([])
         if not headless:
             for traj_no in range(trajectories.size):
                 if not os.path.isfile(trajectories[traj_no].clip_path):

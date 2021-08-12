@@ -37,7 +37,6 @@ class TrueBelief(Belief):
             user_model: the user model that is being learned.
             dataset: list of collectable data that come from the user.
             initial_point: initial point to start the chain for Metropolis-Hastings.
-            proposal_distribution: proposal distribution for Metropolis-Hastings.
             num_samples: number of required samples.
             **kwargs: sampling-related parameters:
                       proposal_distribution, burning and thin for the current sampling algorithm.
