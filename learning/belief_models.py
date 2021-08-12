@@ -1,3 +1,6 @@
+"""
+This file contains Belief classes, which store and update the current belief distribution over the weights (omega).
+"""
 from typing import Callable, Dict, List, Tuple, Union
 import numpy as np
 
@@ -54,6 +57,18 @@ class TrueBelief(Belief):
         self.update(dataset, initial_point)
         
     def update(self, data: Union[QueryWithResponse, List[QueryWithResponse]], initial_point: Dict = None):
+        """
+        This function updates the belief distribution based on the new queries/responses, by adding these to
+        the current dataset and then re-sampling
+        Args:
+            data: one or more QueryWithResponse, which contains multiple trajectory options and the index of the
+                  one the user selected as most optimal
+            initial_point: the initial point to start Metropolis-Hastings from, will be set to the mean from the
+                           previous distribution if None
+
+        Returns: nothing
+
+        """
         if isinstance(data, list):
             self.dataset.extend(data)
         else:
@@ -99,6 +114,7 @@ class TrueBelief(Belief):
 
     @property
     def mean(self):
+        """Takes the mean over the samples for each variable in the samples dict."""
         mean_params = {}
         for key in self.samples[0].keys():
             mean_params[key] = np.mean([self.samples[i][key] for i in range(self.num_samples)], axis=0)

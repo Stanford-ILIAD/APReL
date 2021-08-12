@@ -3,6 +3,10 @@ import gym
 
 
 class Environment:
+    """This is a wrapper around an OpenAI Gym environment,
+    so we can store the features function along with the environment,
+    where the features function is some function of the total observations along a trajectory,
+    and the reward of a trajectory is the omega vector dotted with the features of that trajectory."""
     def __init__(self, env: gym.Env, feature_func: Callable):
         self.env = env
         self.features = feature_func

@@ -1,3 +1,4 @@
+"""Classes to model the expert user who is answering the queries."""
 from typing import Dict, List, Union
 import numpy as np
 import scipy.special as ssp
@@ -7,6 +8,8 @@ from learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQue
 from learning import QueryWithResponse, Demonstration, Preference, WeakComparison, FullRanking
 
 class User:
+    """An abstract class to model the user, with functions to return the probability of a given response to a query,
+    or to generate a response to a query."""
     def __init__(self, params_dict: Dict = None):
         if params_dict is not None:
             self._params = params_dict.copy()
@@ -28,12 +31,15 @@ class User:
         return deepcopy(self)
         
     def response_logprobabilities(self, query: Query) -> np.array:
+        """Returns the log probability for each response in the response set for the query."""
         raise NotImplementedError
         
     def response_probabilities(self, query: Query) -> np.array:
+        """Returns the probability for each response in the response set for the query."""
         return np.exp(self.response_logprobabilities(query))
         
     def loglikelihood(self, data: QueryWithResponse) -> float:
+        """Returns the log probability of the given response to the query."""
         logprobs = self.response_logprobabilities(data)
         if isinstance(data, Preference) or isinstance(data, WeakComparison):
             idx = np.where(data.query.response_set == data.response)[0][0]
@@ -42,6 +48,7 @@ class User:
         return logprobs[idx]
 
     def likelihood(self, data: QueryWithResponse) -> float:
+        """Returns the probability of the given response to the query."""
         return np.exp(self.loglikelihood(data))
         
     def loglikelihood_dataset(self, dataset: List[QueryWithResponse]) -> float:
