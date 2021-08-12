@@ -14,7 +14,6 @@ def kMedoids(D, k, tmax=100):
 
     Returns:
         M: the indices of the k selected queries
-        C:
     """
     # determine dimensions of distance matrix D
     m, n = D.shape
@@ -75,4 +74,4 @@ def kMedoids(D, k, tmax=100):
             C[kappa] = np.where(J==kappa)[0]
 
     # return results
-    return M, C
+    return M

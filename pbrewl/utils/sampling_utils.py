@@ -21,6 +21,8 @@ def uniform_logprior(params: Dict) -> float:
 
 
 def gaussian_proposal(point: Dict) -> Dict:
+    """For the Metropolis-Hastings sampling algorithm, this function generates the next step in the sequence
+    assuming that the omega (or other sampled variables) follow a Gaussian distribution."""
     next_point = {}
     for key, value in point.items():
         if getattr(value, "shape", None) is not None:
