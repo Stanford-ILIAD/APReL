@@ -2,7 +2,7 @@ from typing import List
 import numpy as np
 import scipy.spatial.distance as ssd
 
-from learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQuery
+from pbrewl.learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQuery
 
 
 def default_query_distance(queries: List[Query], **kwargs) -> np.array:
@@ -14,7 +14,7 @@ def default_query_distance(queries: List[Query], **kwargs) -> np.array:
                   See https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.pdist.html for the set of available metrics.
                   
     Returns:
-        distances: an m-by-m numpy array that consists of the pairwise distances between the queries.
+        np.array: an m-by-m numpy array that consists of the pairwise distances between the queries.
     """
     kwargs.setdefault('metric', 'euclidean')
     compatible_types = [isinstance(query, PreferenceQuery) or isinstance(query, WeakComparisonQuery) or isinstance(query, FullRankingQuery) for query in queries]

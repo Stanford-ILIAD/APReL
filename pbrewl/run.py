@@ -2,12 +2,12 @@ from typing import List, Tuple
 import numpy as np
 import gym
 
-from pbrewl import Environment
-from pbrewl import generate_trajectories, uniform_logprior, gaussian_proposal, util_funs, default_query_distance
-from pbrewl import QueryOptimizerDiscreteTrajectorySet
-from pbrewl import SoftmaxUser, HumanUser, TrueBelief
-from pbrewl import PreferenceQuery, Preference, FullRankingQuery, FullRanking, WeakComparisonQuery, WeakComparison
-from pbrewl import cosine_similarity
+from basics import Environment
+from utils import generate_trajectories, uniform_logprior, gaussian_proposal, util_funs, default_query_distance
+from querying import QueryOptimizerDiscreteTrajectorySet
+from learning import SoftmaxUser, HumanUser, SamplingBasedBelief
+from learning import PreferenceQuery, Preference, FullRankingQuery, FullRanking, WeakComparisonQuery, WeakComparison
+from assessing import cosine_similarity
 
 
 def feature_func(traj: List[Tuple[np.array, np.array]]) -> np.array:
@@ -56,7 +56,7 @@ def main(args):
     current_params = {'omega': util_funs.get_random_normalized_vector(features_dim)}
     user_model = SoftmaxUser(current_params)
 
-    belief = TrueBelief(args['log_prior_belief'], user_model, [], current_params,
+    belief = SamplingBasedBelief(args['log_prior_belief'], user_model, [], current_params,
                         num_samples=100, proposal_distribution=gaussian_proposal, burnin=200, thin=20)
     print('Estimated user parameters: ' + str(belief.mean))
     if args['simulate']:

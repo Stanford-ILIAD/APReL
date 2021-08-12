@@ -5,7 +5,7 @@ from moviepy.editor import ImageSequenceClip
 import warnings
 import os
 
-from basics import Environment, Trajectory, TrajectorySet
+from pbrewl.basics import Environment, Trajectory, TrajectorySet
 
 def generate_trajectories(env: Environment,
                           num_trajectories: int,
@@ -73,7 +73,7 @@ def generate_trajectories(env: Environment,
             traj.append((obs, None))
             if env_has_rgb_render:
                 clip = ImageSequenceClip(frames, fps=25)
-                clip_path = 'data/clips/' + file_name + str(traj_no) + '.mp4'
+                clip_path = 'data/clips/' + file_name + '_' + str(traj_no) + '.mp4'
                 clip.write_videofile(clip_path, audio=False)
             else:
                 clip_path = None

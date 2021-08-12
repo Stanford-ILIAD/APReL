@@ -1,15 +1,20 @@
-"""Classes to model the expert user who is answering the queries."""
+"""Modules for user response models, including human users."""
 from typing import Dict, List, Union
 import numpy as np
 import scipy.special as ssp
 from copy import deepcopy
 
-from learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQuery
-from learning import QueryWithResponse, Demonstration, Preference, WeakComparison, FullRanking
+from pbrewl.learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQuery
+from pbrewl.learning import QueryWithResponse, Demonstration, Preference, WeakComparison, FullRanking
+
 
 class User:
-    """An abstract class to model the user, with functions to return the probability of a given response to a query,
-    or to generate a response to a query."""
+    """
+    An abstract class to model the user of which the reward function is being learned.
+    
+    Parameters:
+        params_dict (Dict): parameters of the user model.
+    """
     def __init__(self, params_dict: Dict = None):
         if params_dict is not None:
             self._params = params_dict.copy()
@@ -18,10 +23,12 @@ class User:
     
     @property
     def params(self):
+        """Returns the parameters of the user."""
         return self._params
         
     @params.setter
-    def params(self, params_dict):
+    def params(self, params_dict: Dict):
+        """Replaces the parameters of the user if new values are provided."""
         params_dict_copy = params_dict.copy()
         for key, value in self._params.items():
             params_dict_copy.setdefault(key, value)
@@ -31,15 +38,42 @@ class User:
         return deepcopy(self)
         
     def response_logprobabilities(self, query: Query) -> np.array:
-        """Returns the log probability for each response in the response set for the query."""
+        """
+        Returns the log probability for each response in the response set for the query under the user.
+        
+        Args:
+            query (Query): The query for which the log-probabilites are being calculated.
+            
+        Returns:
+            numpy.array: An array, where each entry is the log-probability of the corresponding response
+                in the :py:attr:`query`'s response set.
+        """
         raise NotImplementedError
         
     def response_probabilities(self, query: Query) -> np.array:
-        """Returns the probability for each response in the response set for the query."""
+        """
+        Returns the probability for each response in the response set for the query under the user.
+        
+        Args:
+            query (Query): The query for which the probabilites are being calculated.
+            
+        Returns:
+            numpy.array: An array, where each entry is the probability of the corresponding response in
+                the :py:attr:`query`'s response set.
+        """
         return np.exp(self.response_logprobabilities(query))
         
     def loglikelihood(self, data: QueryWithResponse) -> float:
-        """Returns the log probability of the given response to the query."""
+        """
+        Returns the loglikelihood of the given user feedback under the user.
+        
+        Args:
+            data (QueryWithResponse): The data (which keeps a query and a response) for which the
+                loglikelihood is going to be calculated.
+            
+        Returns:
+            float: The loglikelihood of :py:attr:`data` under the user.
+        """
         logprobs = self.response_logprobabilities(data)
         if isinstance(data, Preference) or isinstance(data, WeakComparison):
             idx = np.where(data.query.response_set == data.response)[0][0]
@@ -48,19 +82,56 @@ class User:
         return logprobs[idx]
 
     def likelihood(self, data: QueryWithResponse) -> float:
-        """Returns the probability of the given response to the query."""
+        """
+        Returns the likelihood of the given user feedback under the user.
+        
+        Args:
+            data (QueryWithResponse): The data (which keeps a query and a response) for which the
+                likelihood is going to be calculated.
+            
+        Returns:
+            float: The likelihood of :py:attr:`data` under the user.
+        """
         return np.exp(self.loglikelihood(data))
         
     def loglikelihood_dataset(self, dataset: List[QueryWithResponse]) -> float:
-        """Returns the (unnormalized) loglikelihood for the dataset under the conditional independence assumption."""
+        """
+        Returns the loglikelihood of the given feedback dataset under the user.
+        
+        Args:
+            dataset (List[QueryWithResponse]): The dataset (which keeps a list of feedbacks) for which the
+                loglikelihood is going to be calculated.
+            
+        Returns:
+            float: The loglikelihood of :py:attr:`dataset` under the user.
+        """
         return np.sum([self.loglikelihood(data) for data in dataset])
         
     def likelihood_dataset(self, dataset: List[QueryWithResponse]) -> float:
-        """Returns the (unnormalized) likelihood for the dataset under the conditional independence assumption."""
+        """
+        Returns the likelihood of the given feedback dataset under the user.
+        
+        Args:
+            dataset (List[QueryWithResponse]): The dataset (which keeps a list of feedbacks) for which the
+                likelihood is going to be calculated.
+            
+        Returns:
+            float: The likelihood of :py:attr:`dataset` under the user.
+        """
         return np.exp(self.loglikelihood_dataset(dataset))
 
     def respond(self, queries: Union[Query, List[Query]]) -> List:
-        """Simulates the user's response to the given query."""
+        """
+        Simulates the user's responses to the given queries.
+        
+        Args:
+            queries (Query or List[Query]): A query or a list of queries for which the user's response(s)
+                is/are requested.
+                
+        Returns:
+            List: A list of user responses where each response corresponds to the query in the :py:attr:`queries`.
+                :Note: The return type is always a list, even if the input is a single query.
+        """
         if not isinstance(queries, list):
             queries = [queries]
         responses = []
@@ -72,16 +143,22 @@ class User:
 
 
 class SoftmaxUser(User):
+    """
+    Softmax user class whose response model follows the softmax choice rule, i.e., when presented with multiple
+    trajectories, this user chooses each trajectory with a probability that is proportional to the expontential of
+    the reward of that trajectory.
+    
+    Parameters:
+        params_dict: the parameters of the softmax user model, which are:
+            - `omega` (numpy.array): the weights of the linear reward function.
+            - `beta` (float): rationality coefficient for comparisons and rankings.
+            - `beta_D` (float): rationality coefficient for demonstrations.
+            - `delta` (float): the perceivable difference parameter for weak comparison queries.
+
+    Raises:
+        AssertionError: if an `omega` parameter is not provided in the :py:attr:`params_dict`.
+    """
     def __init__(self, params_dict: Dict):
-        """Initializes a softmax user object.
-        
-        Args:
-            params_dict: the parameters of the softmax user model, which are:
-                omega,  the weights of the linear reward function;
-                beta,   rationality coefficient for comparisons and rankings;
-                beta_D, rationality coefficient for demonstrations;
-                delta,  the perceivable difference parameter for weak comparison queries.
-        """
         assert('omega' in params_dict), 'omega is a required parameter for the softmax user model.'       
         params_dict_copy = params_dict.copy()
         params_dict_copy.setdefault('beta', 1.0)
@@ -91,7 +168,7 @@ class SoftmaxUser(User):
         super(SoftmaxUser, self).__init__(params_dict_copy)
         
     def response_logprobabilities(self, query: Query) -> np.array:
-        """Returns the response logprobabilities for each possible respond."""
+        """Overwrites the parent's method. See :class:`.User` for more information."""
         if isinstance(query, PreferenceQuery):
             rewards = self.params['beta'] * np.dot(query.slate.features_matrix, self.params['omega'])
             return rewards - ssp.logsumexp(rewards)
@@ -112,12 +189,14 @@ class SoftmaxUser(User):
                 sorted_rewards = rewards[response]
                 logprobs[response_id] = np.sum([sorted_rewards[i] - ssp.logsumexp(sorted_rewards[i:]) for i in range(len(response))])
             return logprobs
+        raise NotImplementedError("response_logprobabilities is not defined for demonstration queries.")
 
     def loglikelihood(self, data: QueryWithResponse) -> float:
-        """Returns the loglikelihood for the data. Not needed for all data types, but overrides the parent class for faster execution.
+        """
+        Overwrites the parent's method. See :class:`.User` for more information.
         
-        The output value is log(unnormalized likelihood) if the data is a demonstration.
-        Otherwise it is the true loglikelihood.
+        :Note: The loglikelihood value is the logarithm of the `unnormalized` likelihood if the
+            input is a demonstration. Otherwise, it is the exact loglikelihood.
         """
         if isinstance(data, Demonstration):
             return self.params['beta_D'] * np.dot(data.features, self.params['omega'])
@@ -147,12 +226,25 @@ class SoftmaxUser(User):
 
 
 class HumanUser(User):
+    """
+    Human user class whose response model is unknown. This class is useful for interactive runs, where
+    a real human responds to the queries rather than simulated user models.
+    """
     def __init__(self):
-        """Initializes a human user object."""
         super(HumanUser, self).__init__()
         
     def respond(self, queries: Union[Query, List[Query]]) -> List:
-        """Ask the queries to the user."""
+        """
+        Interactively asks for the user's responses to the given queries.
+        
+        Args:
+            queries (Query or List[Query]): A query or a list of queries for which the user's response(s)
+                is/are requested.
+                
+        Returns:
+            List: A list of user responses where each response corresponds to the query in the :py:attr:`queries`.
+                :Note: The return type is always a list, even if the input is a single query.
+        """
         if not isinstance(queries, list):
             queries = [queries]
         responses = []

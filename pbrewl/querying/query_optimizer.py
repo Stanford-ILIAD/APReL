@@ -7,11 +7,11 @@ import numpy as np
 from scipy.spatial import ConvexHull
 import warnings
 
-from basics import Trajectory, TrajectorySet
-from learning import Belief, TrueBelief
-from learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQuery
-from querying import mutual_information, volume_removal, disagreement, regret, random, thompson
-from utils import kMedoids, dpp_mode, default_query_distance
+from pbrewl.basics import Trajectory, TrajectorySet
+from pbrewl.learning import Belief, SamplingBasedBelief
+from pbrewl.learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQuery
+from pbrewl.querying import mutual_information, volume_removal, disagreement, regret, random, thompson
+from pbrewl.utils import kMedoids, dpp_mode, default_query_distance
 
 
 class QueryOptimizer:
@@ -132,7 +132,7 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                     best_batch[i].slate = self.trajectory_set[np.random.choice(self.trajectory_set.size, size=initial_query.K, replace=False)]
                 return best_batch, np.array([1. for _ in range(batch_size)])
                 
-            elif acquisition_func is thompson and isinstance(belief, TrueBelief):
+            elif acquisition_func is thompson and isinstance(belief, SamplingBasedBelief):
                 subsets = np.array([list(tup) for tup in itertools.combinations(np.arange(belief.num_samples), initial_query.K)])
                 planned_traj_ids = [self.argplanner(sample['omega']) for sample in belief.samples]
                 belief_logprobs = np.array(belief.logprobs)
@@ -169,7 +169,7 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                     best_batch[i].slate = self.trajectory_set[subsets[inds[i]]]
                 return best_batch, vals[inds]
                 
-            elif acquisition_func is disagreement and isinstance(belief, TrueBelief):
+            elif acquisition_func is disagreement and isinstance(belief, SamplingBasedBelief):
                 assert(initial_query.K == 2), 'disagreement acquisition function works only with pairwise comparison queries, i.e., K must be 2.'
                 subsets = np.array([list(tup) for tup in itertools.combinations(np.arange(belief.num_samples), initial_query.K)])
                 vals = []
@@ -190,7 +190,7 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                 best_query.slate = [self.planner(belief.samples[best_id]['omega']) for best_id in best_ids]
                 return best_query, maxval
                 
-            elif acquisition_func is regret and isinstance(belief, TrueBelief):
+            elif acquisition_func is regret and isinstance(belief, SamplingBasedBelief):
                 assert(initial_query.K == 2), 'regret acquisition function works only with pairwise comparison queries, i.e., K must be 2.'
                 subsets = np.array([list(tup) for tup in itertools.combinations(np.arange(belief.num_samples), initial_query.K)])
                 planned_trajs = TrajectorySet([self.planner(sample['omega']) for sample in belief.samples])
