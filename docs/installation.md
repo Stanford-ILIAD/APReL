@@ -2,7 +2,7 @@
 **APReL** runs on Python 3.
 
 ### Install from Source
-0. **APReL** uses [ffmpeg](https://www.ffmpeg.org/) for trajectory visualizations. Install it with the following command on Linux:
+1. **APReL** uses [ffmpeg](https://www.ffmpeg.org/) for trajectory visualizations. Install it with the following command on Linux:
    ```sh 
    $ apt install ffmpeg
    ```
@@ -12,28 +12,28 @@
    $ brew install ffmpeg
    ```
 
-1. Clone the robosuite repository
+2. Clone the robosuite repository
    ```sh 
    $ git clone https://github.com/Stanford-ILIAD/APReL.git
    $ cd APReL
    ```
 
-2. Install the base requirements with
+3. Install the base requirements with
    ```sh
    $ pip3 install -r requirements.txt
    ```
 
-3. (Optional) If you want to build the docs locally, you will also need some additional packages, which can be installed with:
+4. (Optional) If you want to build the docs locally, you will also need some additional packages, which can be installed with:
    ```sh
    $ pip3 install -r docs/requirements.txt
    ```
 
-4. Install **APReL** from the source by running:
+5. Install **APReL** from the source by running:
    ```sh
    $ pip3 install -e .
    ```
 
-5. Test **APREL**'s runner file by running
+6. Test **APREL**'s runner file by running
    ```sh
    $ cd examples
    $ python run.py --env "MountainCarContinuous-v0" --max_episode_length 100 --num_trajectories 10

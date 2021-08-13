@@ -17,7 +17,7 @@ Installation
 Installation
 **********************
 
-0. **APReL** uses `ffmpeg <https://www.ffmpeg.org/>`_ for trajectory visualizations. Install it with the following command on Linux:
+1. **APReL** uses `ffmpeg <https://www.ffmpeg.org/>`_ for trajectory visualizations. Install it with the following command on Linux:
 
 .. code-block:: sh
 
@@ -30,7 +30,7 @@ If you are using a Mac, you can use `Homebrew <https://brew.sh/>`_ to install it
    brew install ffmpeg
 
 
-1. Clone the aprel repository
+2. Clone the aprel repository
 
 .. code-block:: sh
 
@@ -38,28 +38,28 @@ If you are using a Mac, you can use `Homebrew <https://brew.sh/>`_ to install it
    cd APReL
 
 
-2. Install the base requirements with
+3. Install the base requirements with
 
 .. code-block:: sh
 
    pip3 install -r requirements.txt
 
 
-3. (Optional) If you want to build the docs locally, you will also need some additional packages, which can be installed with:
+4. (Optional) If you want to build the docs locally, you will also need some additional packages, which can be installed with:
 
 .. code-block:: sh
 
    pip3 install -r docs/requirements.txt
 
 
-4. Install **APReL** from the source by running:
+5. Install **APReL** from the source by running:
 
 .. code-block:: sh
 
    pip3 install -e .
 
 
-5. Test **APReL**'s runner file by running
+6. Test **APReL**'s runner file by running
 
 .. code-block:: sh
 
