@@ -21,7 +21,7 @@ Let's now briefly look at **APReL**'s modules to see how it deals with solving t
 
 <figure>
   <center>
-  <img src="_images/aprel.png" alt="APReL workflow" width="70%">
+  <img src="https://raw.githubusercontent.com/Stanford-ILIAD/APReL/main/docs/images/aprel.png" alt="APReL workflow" width="70%">
   <figcaption style="color: gray;">APReL assumes a human model for how the human provides demonstrations and responds to the queries. Optionally, some passive data from the actual human, e.g., demonstrations, are used to initialize a belief distribution. Based on this belief, query optimizer then outputs a query that will give the most information about actual human. This query is asked to the human, and their response is used to update the belief, which completes the active lerning loop (orange arrows). Finally, the quality of the learned model is assessed in comparison with the actual human.</figcaption>
   </center>
 </figure>
