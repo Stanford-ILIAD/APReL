@@ -20,14 +20,14 @@ Install Requirements & Run
 1. Clone the robosuite repository
 .. code-block:: sh
 
-   $ git clone https://github.com/Stanford-ILIAD/APReL.git
-   $ cd APReL
+   git clone https://github.com/Stanford-ILIAD/APReL.git
+   cd APReL
 
 
 2. Install the base requirements with
 .. code-block:: sh
 
-   $ pip3 install -r requirements.txt
+   pip3 install -r requirements.txt
 
 
 NOTE: **APReL** is not installed as an independent package to your system. Instead, you can move the _aprel_ folder (after you install the base requirements) to import it as needed.
@@ -35,13 +35,19 @@ NOTE: **APReL** is not installed as an independent package to your system. Inste
 3. (Optional) If you want to build the docs locally, you will also need some additional packages, which can be installed with:
 .. code-block:: sh
 
-   $ pip3 install -r docs/requirements.txt
+   pip3 install -r docs/requirements.txt
 
 
 4. Test **APREL**'s runner file by running
 .. code-block:: sh
 
-   $ pip3 install -r requirements.txt
+   pip3 install -r requirements.txt
 
 
-You should be able to see the [MountainCarContinuous-v0](https://gym.openai.com/envs/MountainCarContinuous-v0/) environment rendering multiple times. After it renders (and saves) 10 trajectories, it is going to query you for your preferences. See the [Example page](example.html) for more information about this runner file.
+You should be able to see the `MountainCarContinuous-v0 <https://gym.openai.com/envs/MountainCarContinuous-v0/>`_ environment rendering multiple times. After it renders (and saves) 10 trajectories, it is going to query you for your preferences. See the next section for more information about this runner file.
+
+
+Example
+########
+
+Under construction.
