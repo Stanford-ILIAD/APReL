@@ -14,7 +14,7 @@ Installation
 
 **APReL** runs on Python 3.
 
-Install Requirements & Run
+Installation
 **********************
 
 0. **APReL** uses `ffmpeg <https://www.ffmpeg.org/>`_ for trajectory visualizations. Install it with the following command on Linux:
