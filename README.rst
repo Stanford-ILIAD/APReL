@@ -18,6 +18,7 @@ Install Requirements & Run
 **********************
 
 1. Clone the robosuite repository
+
 .. code-block:: sh
 
    git clone https://github.com/Stanford-ILIAD/APReL.git
@@ -26,6 +27,7 @@ Install Requirements & Run
 
 
 2. Install the base requirements with
+
 .. code-block:: sh
 
    pip3 install -r requirements.txt
@@ -34,12 +36,14 @@ Install Requirements & Run
 NOTE: **APReL** is not installed as an independent package to your system. Instead, you can move the _aprel_ folder (after you install the base requirements) to import it as needed.
 
 3. (Optional) If you want to build the docs locally, you will also need some additional packages, which can be installed with:
+
 .. code-block:: sh
 
    pip3 install -r docs/requirements.txt
 
 
 4. Test **APREL**'s runner file by running
+
 .. code-block:: sh
 
    pip3 install -r requirements.txt
