@@ -21,6 +21,7 @@ Install Requirements & Run
 .. code-block:: sh
 
    git clone https://github.com/Stanford-ILIAD/APReL.git
+   
    cd APReL
 
 
