@@ -7,8 +7,8 @@ This file contains Belief classes, which store and update the belief distributio
 from typing import Callable, Dict, List, Tuple, Union
 import numpy as np
 
-from pbrewl.learning import User, QueryWithResponse
-from pbrewl.utils import gaussian_proposal
+from aprel.learning import User, QueryWithResponse
+from aprel.utils import gaussian_proposal
 
 
 class Belief:

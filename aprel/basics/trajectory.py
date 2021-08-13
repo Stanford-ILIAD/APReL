@@ -5,7 +5,7 @@ import time
 import numpy as np
 from moviepy.editor import VideoFileClip
 
-from pbrewl.basics import Environment
+from aprel.basics import Environment
 
 
 class Trajectory:

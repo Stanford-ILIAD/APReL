@@ -2,12 +2,12 @@ from typing import List, Tuple
 import numpy as np
 import gym
 
-from pbrewl import Environment
-from pbrewl import generate_trajectories, uniform_logprior, gaussian_proposal, util_funs, default_query_distance
-from pbrewl import QueryOptimizerDiscreteTrajectorySet
-from pbrewl import SoftmaxUser, HumanUser, TrueBelief
-from pbrewl import PreferenceQuery, Preference, FullRankingQuery, FullRanking, WeakComparisonQuery, WeakComparison
-from pbrewl import cosine_similarity
+from aprel import Environment
+from aprel import generate_trajectories_randomly, uniform_logprior, gaussian_proposal, util_funs, default_query_distance
+from aprel import QueryOptimizerDiscreteTrajectorySet
+from aprel import SoftmaxUser, HumanUser, TrueBelief
+from aprel import PreferenceQuery, Preference, FullRankingQuery, FullRanking, WeakComparisonQuery, WeakComparison
+from aprel import cosine_similarity
 
 
 def feature_func(traj: List[Tuple[np.array, np.array]]) -> np.array:
@@ -30,9 +30,10 @@ def main(args):
     env = Environment(gym_env, args['feature_func'])
 
     np.random.seed(args['seed'])
-    trajectory_set = generate_trajectories(env, num_trajectories=args['num_trajectories'],
-                                           max_episode_length=args['max_episode_length'],
-                                           file_name=args['env'], restore=args['restore'], headless=args['headless'])
+    trajectory_set = generate_trajectories_randomly(env, num_trajectories=args['num_trajectories'],
+                                                    max_episode_length=args['max_episode_length'],
+                                                    file_name=args['env'], restore=args['restore'],
+                                                    headless=args['headless'])
     features_dim = len(trajectory_set[0].features)
                                            
     # Initialize a dummy query. The optimizer will then find the optimal query of the same kind.

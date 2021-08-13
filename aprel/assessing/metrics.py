@@ -1,7 +1,7 @@
 """Functions that are useful for assessing the accuracy of the given learning agent."""
 import numpy as np
 
-from pbrewl.learning import LinearRewardBelief, User
+from aprel.learning import LinearRewardBelief, User
 
 
 def cosine_similarity(belief: LinearRewardBelief, true_user: User) -> float:

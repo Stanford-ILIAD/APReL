@@ -1,3 +1,5 @@
+"""This module stores the functions for trajectory set generation."""
+
 from typing import List, Union
 import pickle
 import numpy as np
@@ -5,26 +7,34 @@ from moviepy.editor import ImageSequenceClip
 import warnings
 import os
 
-from pbrewl.basics import Environment, Trajectory, TrajectorySet
+from aprel.basics import Environment, Trajectory, TrajectorySet
 
-def generate_trajectories(env: Environment,
-                          num_trajectories: int,
-                          max_episode_length: int = None,
-                          file_name: str = None,
-                          restore: bool = False,
-                          headless: bool = False) -> TrajectorySet:
+
+def generate_trajectories_randomly(env: Environment,
+                                   num_trajectories: int,
+                                   max_episode_length: int = None,
+                                   file_name: str = None,
+                                   restore: bool = False,
+                                   headless: bool = False) -> TrajectorySet:
     """
-    Generates num_trajectories random trajectories, or loads them from the given file.
+    Generates :py:attr:`num_trajectories` random trajectories, or loads (some of) them from the given file.
+
     Args:
-        env: an Environment, which is a class containing an OpenAI Gym environment and a features function
-        num_trajectories: the number of trajectories to generate
-        max_episode_length: the maximum number of time steps for the new trajectories
-        file_name: the file name
-        restore: if true, will first try to load the trajectories from file_name
-        headless: if true, trajectories are saved and printed without rendering
+        env (Environment): An :class:`.Environment` instance containing the OpenAI Gym environment to be simulated.
+        num_trajectories (int): the number of trajectories to generate.
+        max_episode_length (int): the maximum number of time steps for the new trajectories. No limit is assumed if None (or not given).
+        file_name (str): the file name to save the generated trajectory set and/or restore the trajectory set from.
+            :Note: If :py:attr:`restore` is true and so a set is being restored, then the restored file will be overwritten with the new set.
+        restore (bool): If true, it will first try to load the trajectories from :py:attr:`file_name`. If the file has fewer trajectories
+            than needed, then more trajectories will be generated to compensate the difference.
+        headless (bool): If true, the trajectory set will be saved and returned with no visualization. This makes trajectory generation
+            faster, but it might be difficult for real humans to compare trajectories only based on the features without any visualization.
 
-    Returns: a TrajectorySet of num_trajectories trajectories
-
+    Returns:
+        TrajectorySet: A set of :py:attr:`num_trajectories` randomly generated trajectories.
+        
+    Raises:
+        AssertionError: if :py:attr:`restore` is true, but no :py:attr:`file_name` is given.
     """
     assert(not (file_name is None and restore)), 'Trajectory set cannot be restored, because no file_name is given.'
     max_episode_length = np.inf if max_episode_length is None else max_episode_length

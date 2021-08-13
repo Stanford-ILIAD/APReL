@@ -1,19 +1,22 @@
+"""Function for K-Medoids algorithm."""
+
 import numpy as np
 import random
 
 
-def kMedoids(D, k, tmax=100):
+def kMedoids(D: np.array, k: int, tmax: int = 100) -> np.array:
     """
-    For the medoids and boundary medoids methods of generating queries,
-    this function divides the (discrete) space of optimal queries into k clusters,
-    and then selects the medoid from each cluster.
+    Runs the K-Medoids algorithm to return the indices of the medoids.
+    This is based on `Bauckhage (2015) <https://researchgate.net/publication/272351873_NumPy_SciPy_Recipes_for_Data_Science_k-Medoids_Clustering>`_.
+    And the implementation is adopted from https://github.com/letiantian/kmedoids.
+
     Args:
-        D: a distance matrix, where D[a][b] is the distance between queries a and b
-        k: the number of queries to return
-        tmax: the maximum number of steps to take in forming clusters
+        D (numpy.array): a distance matrix, where D[a][b] is the distance between points a and b.
+        k (int): the number of medoids to return.
+        tmax (int): the maximum number of steps to take in forming clusters.
 
     Returns:
-        M: the indices of the k selected queries
+        numpy.array: an array that keeps the indices of the :py:attr:`k` selected queries.
     """
     # determine dimensions of distance matrix D
     m, n = D.shape
@@ -67,11 +70,6 @@ def kMedoids(D, k, tmax=100):
         if np.array_equal(M, Mnew):
             break
         M = np.copy(Mnew)
-    else:
-        # final update of cluster memberships
-        J = np.argmin(D[:,M], axis=1)
-        for kappa in range(k):
-            C[kappa] = np.where(J==kappa)[0]
 
     # return results
     return M

@@ -1,20 +1,26 @@
+"""Utility functions for active batch generation."""
+
 from typing import List
 import numpy as np
 import scipy.spatial.distance as ssd
 
-from pbrewl.learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQuery
+from aprel.learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQuery
 
 
 def default_query_distance(queries: List[Query], **kwargs) -> np.array:
     """Given a set of m queries, returns an m-by-m matrix, each entry representing the distance between the corresponding queries.
     
     Args:
-        queries: list of m queries for which the distances will be computed
-        **kwargs: the distance metric can be specified with the argument 'metric'. Default is 'euclidean'.
-                  See https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.pdist.html for the set of available metrics.
+        queries (List[Query]): list of m queries for which the distances will be computed
+        **kwargs: The hyperparameters.
+
+            - `metric` (str): The distance metric can be specified with this argument. Defaults to 'euclidean'. See https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.pdist.html for the set of available metrics.
                   
     Returns:
-        np.array: an m-by-m numpy array that consists of the pairwise distances between the queries.
+        numpy.array: an m-by-m numpy array that consists of the pairwise distances between the queries.
+        
+    Raises:
+        AssertionError: if the query is not a compatible type. Currently, the compatible types are: :class:`.FullRankingQuery`, :class:`.PreferenceQuery`, and :class:`.WeakComparisonQuery` (all for a slate size of 2).
     """
     kwargs.setdefault('metric', 'euclidean')
     compatible_types = [isinstance(query, PreferenceQuery) or isinstance(query, WeakComparisonQuery) or isinstance(query, FullRankingQuery) for query in queries]

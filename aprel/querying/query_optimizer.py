@@ -1,5 +1,5 @@
 """
-This file contains classes which have functions to generate queries to ask the expert.
+This file contains classes which have functions to optimize the queries to ask the human.
 """
 from typing import Callable, List, Tuple
 import itertools
@@ -7,14 +7,21 @@ import numpy as np
 from scipy.spatial import ConvexHull
 import warnings
 
-from pbrewl.basics import Trajectory, TrajectorySet
-from pbrewl.learning import Belief, SamplingBasedBelief
-from pbrewl.learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQuery
-from pbrewl.querying import mutual_information, volume_removal, disagreement, regret, random, thompson
-from pbrewl.utils import kMedoids, dpp_mode, default_query_distance
+from aprel.basics import Trajectory, TrajectorySet
+from aprel.learning import Belief, SamplingBasedBelief, User
+from aprel.learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQuery
+from aprel.querying import mutual_information, volume_removal, disagreement, regret, random, thompson
+from aprel.utils import kMedoids, dpp_mode, default_query_distance
 
 
 class QueryOptimizer:
+    """
+    An abstract class for query optimizer frameworks.
+    
+    Attributes:
+        acquisition_functions (Dict): keeps name-function pairs for the acquisition functions. If new acquisition
+            functions are implemented, they should be added to this dictionary.
+    """
     def __init__(self):
         self.acquisition_functions = {'mutual_information': mutual_information,
                                       'volume_removal': volume_removal,
@@ -26,21 +33,46 @@ class QueryOptimizer:
 
 class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
     """
-    This class inherits from the query optimizer class, but contains functions that assume the set of possible
-    trajectories is discrete.
+    Query optimization framework that assumes a discrete set of trajectories is available. The query optimization
+    is then performed over this discrete set.
+    
+    Parameters:
+        trajectory_set (TrajectorySet): The set of trajectories from which the queries will be optimized. This set
+            defines the possible set of trajectories that may show up in the optimized query.
+
+    Attributes:
+        trajectory_set (TrajectorySet): The set of trajectories from which the queries are optimized. This set
+            defines the possible set of trajectories that may show up in the optimized query.
     """
     def __init__(self, trajectory_set: TrajectorySet):
         super(QueryOptimizerDiscreteTrajectorySet, self).__init__()
         self.trajectory_set = trajectory_set
         
-    def argplanner(self, omega: np.array) -> int:
-        return np.asscalar(np.argmax(np.dot(self.trajectory_set.features_matrix, omega)))
+    def argplanner(self, user: User) -> int:
+        """
+        Given a user model, returns the index of the trajectory that best fits the user in the trajectory set.
+        
+        Args:
+            user (User): The user object for whom the optimal trajectory is being searched.
+            
+        Returns:
+            int: The index of the optimal trajectory in the trajectory set.
+        """
+        if isinstance(user, SoftmaxUser):
+            return np.asscalar(np.argmax(user.reward(self.trajectory_set)))
+        raise NotImplementedError("The planner has not been implemented for the given user model.")
 
-    def planner(self, omega: np.array) -> Trajectory:
+    def planner(self, user: User) -> Trajectory:
         """
-        Returns the Trajectory in trajectory_set with maximum reward, given a set of weights omega.
+        Given a user model, returns the trajectory in the trajectory set that best fits the user.
+        
+        Args:
+            user (User): The user object for whom the optimal trajectory is being searched.
+            
+        Returns:
+            Trajectory: The optimal trajectory in the trajectory set.
         """
-        return self.trajectory_set[self.argplanner(omega)]
+        return self.trajectory_set[self.argplanner(user)]
         
     def optimize(self,
                  acquisition_func_str: str,
@@ -50,17 +82,37 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                  optimization_method: str = 'exhaustive_search',
                  **kwargs) -> Tuple[List[Query], np.array]:
         """
-        This function generates the optimal batch of queries to ask next.
+        This function generates the optimal query or the batch of queries to ask to the user given a belief
+        distribution about them. It also returns the acquisition function values of the optimized queries.
+        
         Args:
-            acquisition_func_str: the name of the acquisition function used to decide the value of each query
-            belief: the current belief distribution over omega
-            initial_query: an initial query to start exploration from
-            batch_size: the number of queries to return
-            optimization_method:  the name of the method used to select queries
-            **kwargs: extra arguments needed, for specific optimization methods or acquisition functions
-
-        Returns: a batch of queries, and the acquisition function values for those queriess
-
+            acquisition_func_str (str): the name of the acquisition function used to decide the value of each query.
+                Currently implemented options are:
+                
+                - `disagreement`: Based on `Katz. et al. (2019) <https://arxiv.org/abs/1907.05575>`_.
+                - `mutual_information`: Based on `Bıyık et al. (2019) <https://arxiv.org/abs/1910.04365>`_.
+                - `random`: Randomly chooses a query.
+                - `regret`: Based on `Wilde et al. (2020) <https://arxiv.org/abs/2005.04067>`_.
+                - `thompson`: Based on `Tucker et al. (2019) <https://arxiv.org/abs/1909.12316>`_.
+                - `volume_removal`: Based on `Sadigh et al. (2017) <http://m.roboticsproceedings.org/rss13/p53.pdf>`_ and `Bıyık et al. <https://arxiv.org/abs/1904.02209>`_.
+            belief (Belief): the current belief distribution over the user.
+            initial_query (Query): an initial query such that the output query will have the same type.
+            batch_size (int): the number of queries to return.
+            optimization_method (str): the name of the method used to select queries. Currently implemented options are:
+            
+                - `exhaustive_search`: Used for exhaustively searching a single query.
+                - `greedy`: Exhaustively searches for the top :py:attr:`batch_size` queries in terms of the acquisition function.
+                - `medoids`: Batch generation method based on `Bıyık et al. (2018) <https://arxiv.org/abs/1810.04303>`_.
+                - `boundary_medoids`: Batch generation method based on `Bıyık et al. (2018) <https://arxiv.org/abs/1810.04303>`_.
+                - `successive_elimination`: Batch generation method based on `Bıyık et al. (2018) <https://arxiv.org/abs/1810.04303>`_.
+                - `dpp`: Batch generation method based on `Bıyık et al. (2019) <https://arxiv.org/abs/1906.07975>`_.
+            **kwargs: extra arguments needed for specific optimization methods or acquisition functions.
+            
+            Returns:
+                2-tuple:
+                
+                    - List[Query]: The list of optimized queries. **Note**: Even if :py:attr:`batch_size` is 1, a list is returned.
+                    - numpy.array: An array of floats that keep the acquisition function values corresponding to the output queries.
         """
         assert(acquisition_func_str in self.acquisition_functions), 'Unknown acquisition function.'
         acquisition_func = self.acquisition_functions[acquisition_func_str]
@@ -95,15 +147,19 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                           initial_query: Query,
                           **kwargs) -> Tuple[List[Query], np.array]:
         """
-        This function searches over the possible queries to find the singuar most optimal option.
+        Searches over the possible queries to find the singular most optimal query.
+        
         Args:
-            acquisition_func: the name of the acquisition function used to decide the value of each query
-            belief: the current belief distribution over omega
-            initial_query: an initial query to start exploration from
-            **kwargs: extra arguments needed for specific acquisition functions
+            acquisition_func (Callable): the acquisition function to be maximized.
+            belief (Belief): the current belief distribution over the user.
+            initial_query (Query): an initial query such that the output query will have the same type.
+            **kwargs: extra arguments needed for specific acquisition functions.
 
-        Returns: a batch (of size 1) of queries, and the acquisition function values of those queries
-
+        Returns:
+                2-tuple:
+                
+                    - List[Query]: The optimal query as a list of one :class:`.Query`.
+                    - numpy.array: An array of floats that keep the acquisition function value corresponding to the output query.
         """
         return self.greedy_batch(acquisition_func, belief, initial_query, batch_size=1, **kwargs)
 
@@ -114,16 +170,20 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                      batch_size: int,
                      **kwargs) -> Tuple[List[Query], np.array]:
         """
-        Uses the greedy method to find a batch of queries by selecting the batch_size most optimal queries.
+        Uses the greedy method to find a batch of queries by selecting the :py:attr:`batch_size` individually most optimal queries.
+        
         Args:
-            acquisition_func: the name of the acquisition function used to decide the value of each query
-            belief: the current belief distribution over omega
-            initial_query: an initial query to start exploration from
-            batch_size: the number of queries to return
-            **kwargs: extra arguments needed for specific acquisition functions
+            acquisition_func (Callable): the acquisition function to be maximized by each individual query.
+            belief (Belief): the current belief distribution over the user.
+            initial_query (Query): an initial query such that the output query will have the same type.
+            batch_size (int): the batch size of the output.
+            **kwargs: extra arguments needed for specific acquisition functions.
 
-        Returns: a batch of queries, and the acquisition function values of those queries
-
+        Returns:
+                2-tuple:
+                
+                    - List[Query]: The optimized batch of queries as a list.
+                    - numpy.array: An array of floats that keep the acquisition function values corresponding to the output queries.
         """
         if isinstance(initial_query, PreferenceQuery) or isinstance(initial_query, WeakComparisonQuery) or isinstance(initial_query, FullRankingQuery):
             if acquisition_func is random:
@@ -134,7 +194,11 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                 
             elif acquisition_func is thompson and isinstance(belief, SamplingBasedBelief):
                 subsets = np.array([list(tup) for tup in itertools.combinations(np.arange(belief.num_samples), initial_query.K)])
-                planned_traj_ids = [self.argplanner(sample['omega']) for sample in belief.samples]
+                temp_user = belief.user_model.copy()
+                planned_traj_ids = []
+                for sample in belief.samples:
+                    temp_user.params = sample
+                    planned_traj_ids.append(self.argplanner(temp_user))
                 belief_logprobs = np.array(belief.logprobs)
                 best_batch = [initial_query.copy() for _ in range(batch_size)]
                 
@@ -182,18 +246,24 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                 inds = np.argpartition(vals, -batch_size)[-batch_size:]
 
                 best_batch = [initial_query.copy() for _ in range(batch_size)]
+                temp_user = belief.user_model.copy()
                 for i in range(batch_size):
-                    best_batch[i].slate = TrajectorySet([self.planner(belief.samples[best_id]['omega']) for best_id in subsets[inds[i]]])
+                    trajectories = []
+                    for best_id in subsets[inds[i]]:
+                        temp_user.params = belief.samples[best_id]
+                        trajectories.append(self.planner(temp_user))
+                    best_batch[i].slate = TrajectorySet(trajectories)
                 return best_batch, vals[inds]
-
-                best_query = initial_query.copy()
-                best_query.slate = [self.planner(belief.samples[best_id]['omega']) for best_id in best_ids]
-                return best_query, maxval
                 
             elif acquisition_func is regret and isinstance(belief, SamplingBasedBelief):
                 assert(initial_query.K == 2), 'regret acquisition function works only with pairwise comparison queries, i.e., K must be 2.'
                 subsets = np.array([list(tup) for tup in itertools.combinations(np.arange(belief.num_samples), initial_query.K)])
-                planned_trajs = TrajectorySet([self.planner(sample['omega']) for sample in belief.samples])
+                temp_user = belief.user_model.copy()
+                trajectories = []
+                for sample in belief.samples:
+                    temp_user.params = sample
+                    trajectories.append(self.planner(temp_user))
+                planned_trajs = TrajectorySet(trajectories)
                 vals = []
                 belief_samples = np.array(belief.samples)
                 belief_logprobs = np.array(belief.logprobs)
@@ -218,25 +288,32 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                      batch_size: int,
                      **kwargs) -> Tuple[List[Query], np.array]:
         """
-        Uses the medoids method to find a batch of queries to also optimize for query diversity.
-
+        Uses the medoids method to find a batch of queries. See
+        `Batch Active Preference-Based Learning of Reward Functions <https://arxiv.org/abs/1810.04303>`_ for
+        more information about the method.
+        
         Args:
-            acquisition_func: the name of the acquisition function used to decide the value of each query
-            belief: the current belief distribution over omega
-            initial_query: an initial query to start exploration from
-            batch_size: the number of queries to return
-            **kwargs: the (optional) size of the reduced sample space and (optional) distance metric,
-                      plus extra arguments needed for specific acquisition or distance functions
+            acquisition_func (Callable): the acquisition function to be maximized by each individual query.
+            belief (Belief): the current belief distribution over the user.
+            initial_query (Query): an initial query such that the output query will have the same type.
+            batch_size (int): the batch size of the output.
+            **kwargs: Hyperparameters `reduced_size`, `distance`, and extra arguments needed for specific acquisition functions.
+                
+                - `reduced_size` (int): The hyperparameter `B` in the original method. This method first greedily chooses `B` queries from the feasible set of queries out of the trajectory set, and then applies the medoids selection. Defaults to 100.
+                - `distance` (Callable): A distance function which returns a pairwise distance matrix (numpy.array) when inputted a list of queries. Defaults to :py:meth:`aprel.utils.batch_utils.default_query_distance`.
 
-        Returns: a batch of queries, and the acquisition function values of those queries
-
+        Returns:
+                2-tuple:
+                
+                    - List[Query]: The optimized batch of queries as a list.
+                    - numpy.array: An array of floats that keep the acquisition function values corresponding to the output queries.
         """
         kwargs.setdefault('reduced_size', 100)
         kwargs.setdefault('distance', default_query_distance)
         top_queries, vals = self.greedy_batch(acquisition_func, belief, initial_query, batch_size=kwargs['reduced_size'], **kwargs)
         del kwargs['reduced_size']
         distances = kwargs['distance'](top_queries, **kwargs)
-        medoid_ids, _ = kMedoids(distances, batch_size)
+        medoid_ids = kMedoids(distances, batch_size)
         return [top_queries[idx] for idx in medoid_ids], vals[medoid_ids]
         
     def boundary_medoids_batch(self,
@@ -246,18 +323,25 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                                batch_size: int,
                                **kwargs) -> Tuple[List[Query], np.array]:
         """
-        Uses the boundary medoids method to find a batch of queries to also optimize for query diversity.
-
+        Uses the boundary medoids method to find a batch of queries. See
+        `Batch Active Preference-Based Learning of Reward Functions <https://arxiv.org/abs/1810.04303>`_ for
+        more information about the method.
+        
         Args:
-            acquisition_func: the name of the acquisition function used to decide the value of each query
-            belief: the current belief distribution over omega
-            initial_query: an initial query to start exploration from
-            batch_size: the number of queries to return
-            **kwargs: the (optional) size of the reduced sample space and (optional) distance metric,
-                      plus extra arguments needed for specific acquisition or distance functions
+            acquisition_func (Callable): the acquisition function to be maximized by each individual query.
+            belief (Belief): the current belief distribution over the user.
+            initial_query (Query): an initial query such that the output query will have the same type.
+            batch_size (int): the batch size of the output.
+            **kwargs: Hyperparameters `reduced_size`, `distance`, and extra arguments needed for specific acquisition functions.
+                
+                - `reduced_size` (int): The hyperparameter `B` in the original method. This method first greedily chooses `B` queries from the feasible set of queries out of the trajectory set, and then applies the boundary medoids selection. Defaults to 100.
+                - `distance` (Callable): A distance function which returns a pairwise distance matrix (numpy.array) when inputted a list of queries. Defaults to :py:meth:`aprel.utils.batch_utils.default_query_distance`.
 
-        Returns: a batch of queries, and the acquisition function values of those queries
-
+        Returns:
+                2-tuple:
+                
+                    - List[Query]: The optimized batch of queries as a list.
+                    - numpy.array: An array of floats that keep the acquisition function values corresponding to the output queries.
         """
         kwargs.setdefault('reduced_size', 100)
         kwargs.setdefault('distance', default_query_distance)
@@ -282,7 +366,7 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
         else:
             # Otherwise, select the medoids among the boundary queries
             distances = kwargs['distance']([top_queries[i] for i in simplices], **kwargs)
-            temp_ids, _ = kMedoids(distances, batch_size)
+            temp_ids = kMedoids(distances, batch_size)
             medoid_ids = simplices[temp_ids]
         return [top_queries[idx] for idx in medoid_ids], vals[medoid_ids]
 
@@ -293,18 +377,25 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                                      batch_size: int,
                                      **kwargs) -> Tuple[List[Query], np.array]:
         """
-        Uses the successive elimination method to find a batch of queries to also optimize for query diversity.
-
+        Uses the successive elimination method to find a batch of queries. See
+        `Batch Active Preference-Based Learning of Reward Functions <https://arxiv.org/abs/1810.04303>`_ for
+        more information about the method.
+        
         Args:
-            acquisition_func: the name of the acquisition function used to decide the value of each query
-            belief: the current belief distribution over omega
-            initial_query: an initial query to start exploration from
-            batch_size: the number of queries to return
-            **kwargs: the (optional) size of the reduced sample space and (optional) distance metric,
-                      plus extra arguments needed for specific acquisition or distance functions
+            acquisition_func (Callable): the acquisition function to be maximized by each individual query.
+            belief (Belief): the current belief distribution over the user.
+            initial_query (Query): an initial query such that the output query will have the same type.
+            batch_size (int): the batch size of the output.
+            **kwargs: Hyperparameters `reduced_size`, `distance`, and extra arguments needed for specific acquisition functions.
+                
+                - `reduced_size` (int): The hyperparameter `B` in the original method. This method first greedily chooses `B` queries from the feasible set of queries out of the trajectory set, and then applies the boundary medoids selection. Defaults to 100.
+                - `distance` (Callable): A distance function which returns a pairwise distance matrix (numpy.array) when inputted a list of queries. Defaults to :py:meth:`aprel.utils.batch_utils.default_query_distance`.
 
-        Returns: a batch of queries, and the acquisition function values of those queries
-
+        Returns:
+                2-tuple:
+                
+                    - List[Query]: The optimized batch of queries as a list.
+                    - numpy.array: An array of floats that keep the acquisition function values corresponding to the output queries.
         """
         kwargs.setdefault('reduced_size', 100)
         kwargs.setdefault('distance', default_query_distance)
@@ -336,18 +427,26 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                   batch_size: int,
                   **kwargs) -> Tuple[List[Query], np.array]:
         """
-        Uses the DPP method to find a batch of queries to also optimize for query diversity.
-
+        Uses the determinantal point process (DPP) based method to find a batch of queries. See
+        `Batch Active Learning Using Determinantal Point Processes <https://arxiv.org/abs/1906.07975>`_ for
+        more information about the method.
+        
         Args:
-            acquisition_func: the name of the acquisition function used to decide the value of each query
-            belief: the current belief distribution over omega
-            initial_query: an initial query to start exploration from
-            batch_size: the number of queries to return
-            **kwargs: the (optional) size of the reduced sample space, distance metric, and gamma,
-                      plus extra arguments needed for specific acquisition or distance functions
+            acquisition_func (Callable): the acquisition function to be maximized by each individual query.
+            belief (Belief): the current belief distribution over the user.
+            initial_query (Query): an initial query such that the output query will have the same type.
+            batch_size (int): the batch size of the output.
+            **kwargs: Hyperparameters `reduced_size`, `distance`, `gamma`, and extra arguments needed for specific acquisition functions.
+                
+                - `reduced_size` (int): The hyperparameter `B` in the original method. This method first greedily chooses `B` queries from the feasible set of queries out of the trajectory set, and then applies the boundary medoids selection. Defaults to 100.
+                - `distance` (Callable): A distance function which returns a pairwise distance matrix (numpy.array) when inputted a list of queries. Defaults to :py:meth:`aprel.utils.batch_utils.default_query_distance`.
+                - `gamma` (float): The hyperparameter `gamma` in the original method. The higher gamma, the more important the acquisition function values. The lower gamma, the more important the diversity of queries. Defaults to 1.
 
-        Returns: a batch of queries, and the acquisition function values of those queries
-
+        Returns:
+                2-tuple:
+                
+                    - List[Query]: The optimized batch of queries as a list.
+                    - numpy.array: An array of floats that keep the acquisition function values corresponding to the output queries.
         """
         kwargs.setdefault('reduced_size', 100)
         kwargs.setdefault('distance', default_query_distance)

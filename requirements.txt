@@ -2,7 +2,3 @@ numpy>=1.8.0
 moviepy>=1.0.0
 scipy
 gym
-sphinx==4.0.2
-sphinx_rtd_theme==0.5.2
-sphinx-markdown-tables
-nbsphinx

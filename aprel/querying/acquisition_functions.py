@@ -5,9 +5,9 @@ which is useful for acitive query optimization.
 from typing import List, Dict
 import numpy as np
 
-from pbrewl.basics import Trajectory
-from pbrewl.learning import Belief, SamplingBasedBelief
-from pbrewl.learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQuery
+from aprel.basics import Trajectory
+from aprel.learning import Belief, SamplingBasedBelief
+from aprel.learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQuery
 
 def mutual_information(belief: Belief, query: Query, **kwargs) -> float:
     """
@@ -47,7 +47,7 @@ def volume_removal(belief: Belief, query: Query, **kwargs) -> float:
         - `Active Preference-Based Learning of Reward Functions <http://m.roboticsproceedings.org/rss13/p53.pdf>`_
         - `The Green Choice: Learning and Influencing Human Decisions on Shared Roads <https://arxiv.org/abs/1904.02209>`_
     
-    :Note: As `Biyik et al. <https://arxiv.org/abs/1910.04365>`_ pointed out, volume
+    :Note: As `Bıyık et al. (2019) <https://arxiv.org/abs/1910.04365>`_ pointed out, volume
         removal has trivial global maximizers when query maximizes the uncertainty for the
         user, e.g., when all trajectories in the slate of a PreferenceQuery is identical.
         Hence, the optimizations with volume removal are often ill-posed.
@@ -87,6 +87,7 @@ def disagreement(omegas: np.array, logprobs: List[float], **kwargs) -> float:
             disagreement between these two weights will be calculated.
         logprobs (List[float]): log probabilities of the given reward weights under the belief.
         **kwargs: acquisition function hyperparameters:
+
             - `lambda` (float) The tradeoff parameter. The higher lambda, the more important the
                 disagreement between the weights is. The lower lambda, the more important their log
                 probabilities. Defaults to 0.01.
@@ -141,12 +142,12 @@ def regret(omegas: np.array, logprobs: List[float], planned_trajectories: List[T
 
 def thompson():
     """
-    This function does nothing, but is added so that :py:mod:`pbrewl.querying.query_optimizer` can use it as a check.
+    This function does nothing, but is added so that :py:mod:`aprel.querying.query_optimizer` can use it as a check.
     """
     pass # query optimizer handles the thompson sampling based querying
 
 def random():
     """
-    This function does nothing, but is added so that :py:mod:`pbrewl.querying.query_optimizer` can use it as a check.
+    This function does nothing, but is added so that :py:mod:`aprel.querying.query_optimizer` can use it as a check.
     """
     pass # query optimizer handles the random querying -- it is computationally more efficient

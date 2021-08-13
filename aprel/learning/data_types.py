@@ -10,7 +10,7 @@ from copy import deepcopy
 import itertools
 import numpy as np
 
-from pbrewl.basics import Trajectory, TrajectorySet
+from aprel.basics import Trajectory, TrajectorySet
 
 
 class Query:
