@@ -18,12 +18,3 @@ python:
    version: "3.7"
    install:
    - requirements: docs/requirements.txt
-   extra_requirements:
-        - sphinx.ext.napoleon
-        - sphinx_rtd_theme
-        - sphinx_markdown_tables
-        - sphinx.ext.mathjax
-        - sphinx.ext.githubpages
-        - sphinx.ext.autodoc
-        - recommonmark
-        - nbsphinx
