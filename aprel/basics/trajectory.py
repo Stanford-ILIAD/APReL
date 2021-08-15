@@ -49,7 +49,6 @@ class Trajectory:
         """
         if self.clip_path is not None:
             clip = VideoFileClip(self.clip_path)
-            print(self.clip_path)
             clip.preview(fps=30)
             clip.close()
         else:

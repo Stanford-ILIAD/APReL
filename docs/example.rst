@@ -149,7 +149,7 @@ And it is indeed the case, because we tried to make the car go as further as pos
 Well, in this case, all features were correlated: In this environment, you have to go back to move further, so we indeed want the minimum position to be low. Similarly, to go further, we need high speeds.
 Although this is not a part of **APReL**, we trained a reinforcement learning agent using `Soft-Actor Critic <https://github.com/jparkerholder/SAC-PyTorch>`_ with this learned reward function (we used `this implementation <https://github.com/jparkerholder/SAC-PyTorch>`_). This is what we got:
 
-.. image:: docs/images/solved_mountaincar.gif
+.. image:: images/solved_mountaincar.gif
   :width: 50%
   :alt: A MountainCar trajectory where the agent succeeds
   
