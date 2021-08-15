@@ -98,7 +98,7 @@ In this example, we will be using the `MountainCarContinuous-v0 <https://gym.ope
 The original goal in `MountainCarContinuous-v0 <https://gym.openai.com/envs/MountainCarContinuous-v0/>`_ is to move the car such that it reaches the yellow flag.
 
 .. image:: docs/images/mountaincar.gif
-  :width: 50%
+  :width: 40%
   :alt: MountainCarContinuous-v0 example trajectory
 
 
@@ -218,6 +218,14 @@ Continuing in this fashion, we responded the following 9 queries with: [0, 0, 0,
 
 
 Remember our features function: minimum position, maximum position and average speed. The second coefficient being ~0.73 means that we want the maximum position to be high.
-And it is indeed the case, because we tried to make the car go as further as possible. But how about the other two features? Well, in this case, all features were correlated: In this environment, you have to go back to move further, so we indeed want the minimum position to be low. Similarly, to go further, we need high speeds.
+And it is indeed the case, because we tried to make the car go as further as possible. But how about the other two features?
+Well, in this case, all features were correlated: In this environment, you have to go back to move further, so we indeed want the minimum position to be low. Similarly, to go further, we need high speeds.
+Although this is not a part of **APReL**, we trained a reinforcement learning agent using `Soft-Actor Critic <https://github.com/jparkerholder/SAC-PyTorch>`_ with this learned reward function (we used `this implementation <https://github.com/jparkerholder/SAC-PyTorch>`_). This is what we got:
 
-Interested in learning other features? Take a look at a more advanced example at: `examples/advanced.py <examples/advanced.py>`_!
+.. image:: docs/images/solved_mountaincar.gif
+  :width: 40%
+  :alt: A MountainCar trajectory where the agent succeeds
+  
+Only after 10 queries, we were able to learn a reward function that solves the game! Note that the agent also makes sure to go as back as possible because of the way we designed the features. Can you come up with a better feature function?
+
+Interested in learning other options and features of **APReL**? Take a look at a more advanced example at: `examples/advanced.py <examples/advanced.py>`_!
