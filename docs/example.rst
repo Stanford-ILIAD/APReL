@@ -1,76 +1,3 @@
-====================================
-APReL: A Library for Active Preference-based Reward Learning Algorithms
-====================================
-
-.. image:: https://readthedocs.org/projects/aprel/badge/?version=latest
-  :target: http://aprel.readthedocs.io/en/latest/?badge=latest
-  :alt: Documentation Status
-
-**APReL** is a unified Python3 library for active preference-based reward learning methods. It offers a modular framework for experimenting with and implementing preference-based reward learning techniques; which include active querying, multimodal learning, and batch generation methods.
-
-
-Installation
-########
-
-**APReL** runs on Python 3.
-
-Installation
-**********************
-
-1. **APReL** uses `ffmpeg <https://www.ffmpeg.org/>`_ for trajectory visualizations. Install it with the following command on Linux:
-
-.. code-block:: sh
-
-   apt install ffmpeg
-
-If you are using a Mac, you can use `Homebrew <https://brew.sh/>`_ to install it:
-
-.. code-block:: sh
-
-   brew install ffmpeg
-
-
-2. Clone the aprel repository
-
-.. code-block:: sh
-
-   git clone https://github.com/Stanford-ILIAD/APReL.git
-   cd APReL
-
-
-3. Install the base requirements with
-
-.. code-block:: sh
-
-   pip3 install -r requirements.txt
-
-
-4. (Optional) If you want to build the docs locally, you will also need some additional packages, which can be installed with:
-
-.. code-block:: sh
-
-   pip3 install -r docs/requirements.txt
-
-
-5. Install **APReL** from the source by running:
-
-.. code-block:: sh
-
-   pip3 install -e .
-
-
-6. Test **APReL**'s runner file by running
-
-.. code-block:: sh
-
-   cd examples
-   python simple.py
-
-
-You should be able to see the `MountainCarContinuous-v0 <https://gym.openai.com/envs/MountainCarContinuous-v0/>`_ environment rendering multiple times.
-After it renders (and saves) 10 trajectories, it is going to query you for your preferences. See the next section for more information about this runner file.
-
-
 Example
 ########
 
@@ -97,7 +24,7 @@ In this example, we will be using the `MountainCarContinuous-v0 <https://gym.ope
 
 The original goal in `MountainCarContinuous-v0 <https://gym.openai.com/envs/MountainCarContinuous-v0/>`_ is to move the car such that it reaches the yellow flag.
 
-.. image:: docs/images/mountaincar.gif
+.. image:: images/mountaincar.gif
   :width: 50%
   :alt: MountainCarContinuous-v0 example trajectory
 
@@ -206,7 +133,7 @@ In the next for-loop, we repeatedly do three things: (i) optimize a query, (ii) 
 Running this code will ask you to respond 10 preference queries that are optimized with respect to the mutual information acquisition function.
 Below is the first query that is asked to the user:
 
-.. image:: docs/images/query.gif
+.. image:: images/query.gif
   :alt: The first query asked to the user
 
 We select 0 for this query. In other words, we say we prefer the first trajectory. Because it gets closer to solving the task by moving closer to the yellow flag, even though it cannot make it.
