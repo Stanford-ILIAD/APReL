@@ -150,7 +150,7 @@ Well, in this case, all features were correlated: In this environment, you have 
 Although this is not a part of **APReL**, we trained a reinforcement learning agent using `Soft-Actor Critic <https://github.com/jparkerholder/SAC-PyTorch>`_ with this learned reward function (we used `this implementation <https://github.com/jparkerholder/SAC-PyTorch>`_). This is what we got:
 
 .. image:: docs/images/solved_mountaincar.gif
-  :width: 40%
+  :width: 50%
   :alt: A MountainCar trajectory where the agent succeeds
   
 Only after 10 queries, we were able to learn a reward function that solves the game! Note that the agent also makes sure to go as back as possible because of the way we designed the features. Can you come up with a better feature function?

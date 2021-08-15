@@ -14,4 +14,5 @@
 - [NumPy / SciPy Recipes for Data Science: k-Medoids Clustering](https://www.researchgate.net/publication/272351873_NumPy_SciPy_Recipes_for_Data_Science_k-Medoids_Clustering). Christian Bauckhage
 - [OpenAI Gym](https://arxiv.org/abs/1606.01540). Greg Brockman, Vicki Cheung, Ludwig Pettersson, Jonas Schneider, John Schulman, Jie Tang, Wojciech Zaremba
 - [Preference-Based Learning for Exoskeleton Gait Optimization](https://arxiv.org/abs/1909.12316) . Maegan Tucker, Ellen Novoseller, Claudia Kann, Yanan Sui, Yisong Yue, Joel Burdick, Aaron D. Ames
+- [Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor] . Tuomas Haarnoja, Aurick Zhou, Pieter Abbeel, Sergey Levine
 - [The Green Choice: Learning and Influencing Human Deci-sions on Shared Roads](https://arxiv.org/abs/1904.02209). Erdem Bıyık, Daniel A. Lazar, Dorsa Sadigh, Ramtin Pedarsani
