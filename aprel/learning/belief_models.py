@@ -8,7 +8,7 @@ from typing import Callable, Dict, List, Tuple, Union
 import numpy as np
 
 from aprel.learning import User, QueryWithResponse
-from aprel.utils import gaussian_proposal
+from aprel.utils import gaussian_proposal, uniform_logprior
 
 
 class Belief:
@@ -44,6 +44,7 @@ class SamplingBasedBelief(LinearRewardBelief):
         user_model (User): The user response model that will be assumed by this belief distribution.
         dataset (List[QueryWithResponse]): A list of user feeedbacks.
         initial_point (Dict): An initial set of user parameters for Metropolis-Hastings to start.
+        logprior (Callable): The logarithm of the prior distribution over the user parameters. Defaults to a uniform distribution over the hyperball.
         num_samples (int): The number of parameter samples that will be sampled using Metropolis-Hastings.
         **kwargs: Hyperparameters for Metropolis-Hastings, which include:
             
@@ -52,7 +53,6 @@ class SamplingBasedBelief(LinearRewardBelief):
             - `proposal_distribution` (Callable): The proposal distribution for the steps in Metropolis-Hastings.
             
     Attributes:
-        logprior (Callable): The logarithm of the prior distribution over the user parameters.
         user_model (User): The user response model that is assumed by the belief distribution.
         dataset (List[QueryWithResponse]): A list of user feeedbacks.
         num_samples (int): The number of parameter samples that will be sampled using Metropolis-Hastings.
@@ -63,10 +63,10 @@ class SamplingBasedBelief(LinearRewardBelief):
             - `proposal_distribution` (Callable): The proposal distribution for the steps in Metropolis-Hastings.
     """
     def __init__(self,
-                 logprior: Callable,
                  user_model: User,
                  dataset: List[QueryWithResponse],
                  initial_point: Dict,
+                 logprior: Callable = uniform_logprior,
                  num_samples: int = 100,
                  **kwargs):
         super(SamplingBasedBelief, self).__init__()
@@ -141,6 +141,6 @@ class SamplingBasedBelief(LinearRewardBelief):
         mean_params = {}
         for key in self.samples[0].keys():
             mean_params[key] = np.mean([self.samples[i][key] for i in range(self.num_samples)], axis=0)
-            if key == 'omega':
+            if key == 'weights':
                 mean_params[key] /= np.linalg.norm(mean_params[key])
         return mean_params

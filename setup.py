@@ -7,7 +7,7 @@ with open(path.join(this_directory, 'README.rst'), encoding='utf-8') as f:
     lines = f.readlines()
 
 # remove images from README
-lines = [x for x in lines if '.png' not in x]
+lines = [x for x in lines if '.png' not in x and '.gif' not in x]
 long_description = ''.join(lines)
 
 setup(

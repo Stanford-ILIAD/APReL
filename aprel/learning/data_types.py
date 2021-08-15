@@ -9,6 +9,7 @@ from typing import List, Union
 from copy import deepcopy
 import itertools
 import numpy as np
+import time
 
 from aprel.basics import Trajectory, TrajectorySet
 
@@ -26,8 +27,12 @@ class Query:
         """Returns a deep copy of the query."""
         return deepcopy(self)
         
-    def visualize(self):
-        """Visualizes the query, i.e., asks it to the user."""
+    def visualize(self, delay: float = 0.):
+        """Visualizes the query, i.e., asks it to the user.
+        
+        Args:
+            delay (float): The waiting time between each trajectory visualization in seconds.
+        """
         raise NotImplementedError
 
 
@@ -130,10 +135,18 @@ class PreferenceQuery(Query):
         self.K = self._slate.size
         self.response_set = np.arange(self.K)
         
-    def visualize(self) -> int:
-        """Visualizes the query and interactively asks for a response."""
+    def visualize(self, delay: float = 0.) -> int:
+        """Visualizes the query and interactively asks for a response.
+        
+        Args:
+            delay (float): The waiting time between each trajectory visualization in seconds.
+            
+        Returns:
+            int: The response of the user.
+        """
         for i in range(self.K):
             print('Playing trajectory #' + str(i))
+            time.sleep(delay)
             self.slate[i].visualize()
         selection = None
         while selection is None:
@@ -200,10 +213,18 @@ class WeakComparisonQuery(Query):
         self.K = self._slate.size
         self.response_set = np.array([-1,0,1])
 
-    def visualize(self) -> int:
-        """Visualizes the query and interactively asks for a response."""
+    def visualize(self, delay: float = 0.) -> int:
+        """Visualizes the query and interactively asks for a response.
+        
+        Args:
+            delay (float): The waiting time between each trajectory visualization in seconds.
+            
+        Returns:
+            int: The response of the user.
+        """
         for i in range(self.K):
             print('Playing trajectory #' + str(i))
+            time.sleep(delay)
             self.slate[i].visualize()
         selection = None
         while selection is None:
@@ -269,10 +290,18 @@ class FullRankingQuery(Query):
         self.K = self._slate.size
         self.response_set = np.array([list(tup) for tup in itertools.permutations(np.arange(self.K))])
 
-    def visualize(self) -> List[int]:
-        """Visualizes the query and interactively asks for a response."""
+    def visualize(self, delay: float = 0.) -> List[int]:
+        """Visualizes the query and interactively asks for a response.
+        
+        Args:
+            delay (float): The waiting time between each trajectory visualization in seconds.
+            
+        Returns:
+            List[int]: The response of the user, as a list from the most preferred to the least.
+        """
         for i in range(self.K):
             print('Playing trajectory #' + str(i))
+            time.sleep(delay)
             self.slate[i].visualize()
         response = []
         i = 1

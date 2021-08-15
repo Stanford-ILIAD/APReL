@@ -15,7 +15,8 @@ def generate_trajectories_randomly(env: Environment,
                                    max_episode_length: int = None,
                                    file_name: str = None,
                                    restore: bool = False,
-                                   headless: bool = False) -> TrajectorySet:
+                                   headless: bool = False,
+                                   seed: int = None) -> TrajectorySet:
     """
     Generates :py:attr:`num_trajectories` random trajectories, or loads (some of) them from the given file.
 
@@ -29,6 +30,8 @@ def generate_trajectories_randomly(env: Environment,
             than needed, then more trajectories will be generated to compensate the difference.
         headless (bool): If true, the trajectory set will be saved and returned with no visualization. This makes trajectory generation
             faster, but it might be difficult for real humans to compare trajectories only based on the features without any visualization.
+        seed (int): Seed for the randomness of action selection.
+            :Note: Environment should be separately seeded. This seed is only for the action selection.
 
     Returns:
         TrajectorySet: A set of :py:attr:`num_trajectories` randomly generated trajectories.
@@ -40,29 +43,30 @@ def generate_trajectories_randomly(env: Environment,
     max_episode_length = np.inf if max_episode_length is None else max_episode_length
     if restore:
         try:
-            with open('data/' + file_name + '.pkl', 'rb') as f:
+            with open('aprel_trajectories/' + file_name + '.pkl', 'rb') as f:
                 trajectories = pickle.load(f)
         except:
-            warnings.warn('Ignoring restore=True, because \'data/' + file_name + '.pkl\' is not found.')
+            warnings.warn('Ignoring restore=True, because \'aprel_trajectories/' + file_name + '.pkl\' is not found.')
             trajectories = TrajectorySet([])
         if not headless:
             for traj_no in range(trajectories.size):
-                if not os.path.isfile(trajectories[traj_no].clip_path):
+                if trajectories[traj_no].clip_path is None or not os.path.isfile(trajectories[traj_no].clip_path):
                     warnings.warn('Ignoring restore=True, because headless=False and some trajectory clips are missing.')
                     trajectories = TrajectorySet([])
                     break
     else:
         trajectories = TrajectorySet([])
     
-    if not os.path.exists('data'):
-        os.makedirs('data')
+    if not os.path.exists('aprel_trajectories'):
+        os.makedirs('aprel_trajectories')
     
     if trajectories.size >= num_trajectories:
         trajectories = TrajectorySet(trajectories[:num_trajectories])
     else:
         env_has_rgb_render = env.render_exists and not headless
-        if env_has_rgb_render and not os.path.exists('data/clips'):
-            os.makedirs('data/clips')
+        if env_has_rgb_render and not os.path.exists('aprel_trajectories/clips'):
+            os.makedirs('aprel_trajectories/clips')
+        env.action_space.seed(seed)
         for traj_no in range(trajectories.size, num_trajectories):
             traj = []
             obs = env.reset()
@@ -82,8 +86,8 @@ def generate_trajectories_randomly(env: Environment,
                     frames.append(np.uint8(env.render(mode='rgb_array')))
             traj.append((obs, None))
             if env_has_rgb_render:
-                clip = ImageSequenceClip(frames, fps=25)
-                clip_path = 'data/clips/' + file_name + '_' + str(traj_no) + '.mp4'
+                clip = ImageSequenceClip(frames, fps=30)
+                clip_path = 'aprel_trajectories/clips/' + file_name + '_' + str(traj_no) + '.mp4'
                 clip.write_videofile(clip_path, audio=False)
             else:
                 clip_path = None
@@ -91,7 +95,7 @@ def generate_trajectories_randomly(env: Environment,
             if env.close_exists:
                 env.close()
 
-    with open('data/' + file_name + '.pkl', 'wb') as f:
+    with open('aprel_trajectories/' + file_name + '.pkl', 'wb') as f:
         pickle.dump(trajectories, f)
 
     if not headless and trajectories[-1].clip_path is None:

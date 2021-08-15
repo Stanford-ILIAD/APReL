@@ -36,6 +36,6 @@
 6. Test **APREL**'s runner file by running
    ```sh
    $ cd examples
-   $ python run.py --env "MountainCarContinuous-v0" --max_episode_length 100 --num_trajectories 10
+   $ python simple.py
    ```
    You should be able to see the [MountainCarContinuous-v0](https://gym.openai.com/envs/MountainCarContinuous-v0/) environment rendering multiple times. After it renders (and saves) 10 trajectories, it is going to query you for your preferences. See the [Example page](example.html) for more information about this runner file.

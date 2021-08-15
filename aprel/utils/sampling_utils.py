@@ -4,15 +4,15 @@ import numpy as np
 
 def uniform_logprior(params: Dict) -> float:
     """
-    This is a log prior belief over the user. Specifically, it is a uniform distribution over ||omega|| <= 1.
+    This is a log prior belief over the user. Specifically, it is a uniform distribution over ||weights|| <= 1.
     
     Args:
         params (Dict): parameters of the user for which the log prior is going to be calculated.
 
     Returns: 
-        float: the (unnormalized) log probability of omega, which is 0 (as 0 = log 1) if ||omega|| <= 1, and negative infitiny otherwise.
+        float: the (unnormalized) log probability of weights, which is 0 (as 0 = log 1) if ||weights|| <= 1, and negative infitiny otherwise.
     """
-    if np.linalg.norm(params['omega']) <= 1:
+    if np.linalg.norm(params['weights']) <= 1:
         return 0.
     return -np.inf
 
@@ -37,6 +37,6 @@ def gaussian_proposal(point: Dict) -> Dict:
         else:
             shape = [1]
         next_point[key] = value + np.random.randn(*shape) * 0.05
-        if key == 'omega':
+        if key == 'weights':
             next_point[key] /= np.linalg.norm(next_point[key])
     return next_point

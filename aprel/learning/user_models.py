@@ -150,17 +150,17 @@ class SoftmaxUser(User):
     the reward of that trajectory.
     
     Parameters:
-        params_dict: the parameters of the softmax user model, which are:
-            - `omega` (numpy.array): the weights of the linear reward function.
+        params_dict (Dict): the parameters of the softmax user model, which are:
+            - `weights` (numpy.array): the weights of the linear reward function.
             - `beta` (float): rationality coefficient for comparisons and rankings.
             - `beta_D` (float): rationality coefficient for demonstrations.
             - `delta` (float): the perceivable difference parameter for weak comparison queries.
 
     Raises:
-        AssertionError: if an `omega` parameter is not provided in the :py:attr:`params_dict`.
+        AssertionError: if a `weights` parameter is not provided in the :py:attr:`params_dict`.
     """
     def __init__(self, params_dict: Dict):
-        assert('omega' in params_dict), 'omega is a required parameter for the softmax user model.'       
+        assert('weights' in params_dict), 'weights is a required parameter for the softmax user model.'       
         params_dict_copy = params_dict.copy()
         params_dict_copy.setdefault('beta', 1.0)
         params_dict_copy.setdefault('beta_D', 1.0)
@@ -236,17 +236,24 @@ class SoftmaxUser(User):
             numpy.array or float: the reward value of the :py:attr:`trajectories` conditioned on the user.
         """
         if isinstance(trajectories, TrajectorySet):
-            return np.dot(trajectories.features_matrix, self.params['omega'])
-        return np.dot(trajectories.features, self.params['omega'])
+            return np.dot(trajectories.features_matrix, self.params['weights'])
+        return np.dot(trajectories.features, self.params['weights'])
 
 
 class HumanUser(User):
     """
     Human user class whose response model is unknown. This class is useful for interactive runs, where
     a real human responds to the queries rather than simulated user models.
+    
+    Parameters:
+        delay (float): The waiting time between each trajectory visualization during querying in seconds.
+        
+    Attributes:
+        delay (float): The waiting time between each trajectory visualization during querying in seconds.
     """
-    def __init__(self):
+    def __init__(self, delay: float = 0.):
         super(HumanUser, self).__init__()
+        self.delay = delay
         
     def respond(self, queries: Union[Query, List[Query]]) -> List:
         """
@@ -264,5 +271,5 @@ class HumanUser(User):
             queries = [queries]
         responses = []
         for query in queries:
-            responses.append(query.visualize())
+            responses.append(query.visualize(self.delay))
         return responses

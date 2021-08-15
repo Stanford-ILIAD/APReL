@@ -3,10 +3,10 @@ import numpy as np
 import gym
 
 from aprel import Environment
-from aprel import generate_trajectories_randomly, uniform_logprior, gaussian_proposal, util_funs, default_query_distance
-from aprel import QueryOptimizerDiscreteTrajectorySet
-from aprel import SoftmaxUser, HumanUser, TrueBelief
+from aprel import SoftmaxUser, HumanUser, SamplingBasedBelief
 from aprel import PreferenceQuery, Preference, FullRankingQuery, FullRanking, WeakComparisonQuery, WeakComparison
+from aprel import QueryOptimizerDiscreteTrajectorySet
+from aprel import generate_trajectories_randomly, uniform_logprior, gaussian_proposal, util_funs, default_query_distance
 from aprel import cosine_similarity
 
 
@@ -49,16 +49,17 @@ def main(args):
     query_optimizer = QueryOptimizerDiscreteTrajectorySet(trajectory_set)
 
     if args['simulate']:
-        true_params = {'omega': util_funs.get_random_normalized_vector(features_dim)}
+        true_params = {'weights': util_funs.get_random_normalized_vector(features_dim)}
         true_user = SoftmaxUser(true_params)
     else:
         true_user = HumanUser()
 
-    current_params = {'omega': util_funs.get_random_normalized_vector(features_dim)}
-    user_model = SoftmaxUser(current_params)
+    params = {'weights': util_funs.get_random_normalized_vector(features_dim)}
+    user_model = SoftmaxUser(params)
 
-    belief = TrueBelief(args['log_prior_belief'], user_model, [], current_params,
-                        num_samples=100, proposal_distribution=gaussian_proposal, burnin=200, thin=20)
+    belief = SamplingBasedBelief(args['log_prior_belief'], user_model, [], params,
+                                 num_samples=100, proposal_distribution=gaussian_proposal,
+                                 burnin=200, thin=20)
     print('Estimated user parameters: ' + str(belief.mean))
     if args['simulate']:
         cos_sim = cosine_similarity(belief, true_user)

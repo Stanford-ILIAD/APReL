@@ -72,9 +72,9 @@ def volume_removal(belief: Belief, query: Query, **kwargs) -> float:
     raise NotImplementedError
 
 
-def disagreement(omegas: np.array, logprobs: List[float], **kwargs) -> float:
+def disagreement(weights: np.array, logprobs: List[float], **kwargs) -> float:
     """
-    This function returns the disagreement value between two sets of reward weights (omega's).
+    This function returns the disagreement value between two sets of reward weights (weights's).
     This is useful as an acquisition function when a trajectory planner is available and when
     the desired query contains only two trajectories. The pair of weights with the highest
     disagreement is found and then the best trajectories according to them forms the optimized query.
@@ -83,7 +83,7 @@ def disagreement(omegas: np.array, logprobs: List[float], **kwargs) -> float:
         - `Learning an Urban Air Mobility Encounter Model from Expert Preferences <https://arxiv.org/abs/1907.05575>`_
     
     Args:
-        omegas (numpy.array): 2 x d array where each row is a set of reward weights. The
+        weights (numpy.array): 2 x d array where each row is a set of reward weights. The
             disagreement between these two weights will be calculated.
         logprobs (List[float]): log probabilities of the given reward weights under the belief.
         **kwargs: acquisition function hyperparameters:
@@ -96,19 +96,19 @@ def disagreement(omegas: np.array, logprobs: List[float], **kwargs) -> float:
         float: the disagreement value (always nonnegative)
         
     Raises:
-        AssertionError: if :py:attr:`omegas` and :py:attr:`logprobs` have mismatching number of elements.
+        AssertionError: if :py:attr:`weights` and :py:attr:`logprobs` have mismatching number of elements.
     """
-    assert(len(omegas) == len(logprobs) == 2), 'disagreement acquisition function works only with pairwise comparison queries, i.e., K must be 2.'
+    assert(len(weights) == len(logprobs) == 2), 'disagreement acquisition function works only with pairwise comparison queries, i.e., K must be 2.'
 
     kwargs.setdefault('lambda', 1e-2)
     term1 = np.prod(np.exp(logprobs))
-    term2 = kwargs['lambda'] * np.linalg.norm(omegas[0] - omegas[1])
+    term2 = kwargs['lambda'] * np.linalg.norm(weights[0] - weights[1])
     return term1 + term2
     
     
-def regret(omegas: np.array, logprobs: List[float], planned_trajectories: List[Trajectory], **kwargs) -> float:
+def regret(weights: np.array, logprobs: List[float], planned_trajectories: List[Trajectory], **kwargs) -> float:
     """
-    This function returns the regret value between two sets of reward weights (omega's).
+    This function returns the regret value between two sets of reward weights (weights's).
     This is useful as an acquisition function when a trajectory planner is available and when
     the desired query contains only two trajectories. The pair of weights with the highest
     regret is found and then the best trajectories according to them forms the optimized query.
@@ -120,7 +120,7 @@ def regret(omegas: np.array, logprobs: List[float], planned_trajectories: List[T
         for that.
     
     Args:
-        omegas (numpy.array): 2 x d array where each row is a set of reward weights. The
+        weights (numpy.array): 2 x d array where each row is a set of reward weights. The
             regret between these two weights will be calculated.
         logprobs (List[float]): log probabilities of the given reward weights under the belief.
         planned_trajectories (List[Trajectory]): the optimal trajectories under the given reward weights.
@@ -130,14 +130,14 @@ def regret(omegas: np.array, logprobs: List[float], planned_trajectories: List[T
         float: the regret value
         
     Raises:
-        AssertionError: if :py:attr:`omegas`, :py:attr:`logprobs` and :py:attr:`planned_trajectories`
+        AssertionError: if :py:attr:`weights`, :py:attr:`logprobs` and :py:attr:`planned_trajectories`
             have mismatching number of elements.
     """
-    assert(len(omegas) == len(logprobs) == len(planned_trajectories) == 2), 'regret acquisition function works only with pairwise comparison queries, i.e., K must be 2.'
+    assert(len(weights) == len(logprobs) == len(planned_trajectories) == 2), 'regret acquisition function works only with pairwise comparison queries, i.e., K must be 2.'
 
     term1 = np.prod(np.exp(logprobs))
-    term2 = np.dot(omegas[0], planned_trajectories[0].features) / np.dot(omegas[1], planned_trajectories[0].features)
-    term3 = np.dot(omegas[1], planned_trajectories[1].features) / np.dot(omegas[0], planned_trajectories[1].features)
+    term2 = np.dot(weights[0], planned_trajectories[0].features) / np.dot(weights[1], planned_trajectories[0].features)
+    term3 = np.dot(weights[1], planned_trajectories[1].features) / np.dot(weights[0], planned_trajectories[1].features)
     return term1 * (term2 + term3)
 
 def thompson():

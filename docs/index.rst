@@ -26,8 +26,8 @@ Welcome to APReL's documentation!
    :maxdepth: 1
    :caption: Miscellaneous
 
-   references
    acknowledgement
+   references
 
 Indices and tables
 ==================

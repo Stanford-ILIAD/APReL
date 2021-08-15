@@ -240,8 +240,8 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                 belief_samples = np.array(belief.samples)
                 belief_logprobs = np.array(belief.logprobs)
                 for ids in subsets:
-                    omegas = np.array([sample['omega'] for sample in belief_samples[ids]])
-                    vals.append(acquisition_func(omegas, belief_logprobs[ids], **kwargs))
+                    weights = np.array([sample['weights'] for sample in belief_samples[ids]])
+                    vals.append(acquisition_func(weights, belief_logprobs[ids], **kwargs))
                 vals = np.array(vals)
                 inds = np.argpartition(vals, -batch_size)[-batch_size:]
 
@@ -268,8 +268,8 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                 belief_samples = np.array(belief.samples)
                 belief_logprobs = np.array(belief.logprobs)
                 for ids in subsets:
-                    omegas = np.array([sample['omega'] for sample in belief_samples[ids]])
-                    vals.append(acquisition_func(omegas, belief_logprobs[ids], planned_trajs[ids], **kwargs))
+                    weights = np.array([sample['weights'] for sample in belief_samples[ids]])
+                    vals.append(acquisition_func(weights, belief_logprobs[ids], planned_trajs[ids], **kwargs))
                 vals = np.array(vals)
                 inds = np.argpartition(vals, -batch_size)[-batch_size:]
                 
