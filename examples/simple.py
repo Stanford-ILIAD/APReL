@@ -35,7 +35,7 @@ features_dim = len(trajectory_set[0].features)
 
 query_optimizer = aprel.QueryOptimizerDiscreteTrajectorySet(trajectory_set)
 
-true_user = aprel.HumanUser(delay=1.0)
+true_user = aprel.HumanUser(delay=0.5)
 
 params = {'weights': aprel.util_funs.get_random_normalized_vector(features_dim)}
 user_model = aprel.SoftmaxUser(params)

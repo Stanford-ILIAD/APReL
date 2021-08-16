@@ -78,11 +78,11 @@ Let's now define the optimizer which will optimize the queries by considering tr
     query_optimizer = aprel.QueryOptimizerDiscreteTrajectorySet(trajectory_set)
 
 
-**APReL** allows both simulated and real humans. In this example, we will assume a real human is going to respond to the queries. Next, we define this such that there will be a one-second delay time after each trajectory visualization during querying.
+**APReL** allows both simulated and real humans. In this example, we will assume a real human is going to respond to the queries. Next, we define this such that there will be a 0.5 seconds delay time after each trajectory visualization during querying.
 
 .. code-block:: python
 
-    true_user = aprel.HumanUser(delay=1.0)
+    true_user = aprel.HumanUser(delay=0.5)
 
 
 We will learn a reward function that is linear in trajectory features by assuming a softmax human response model.

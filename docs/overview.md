@@ -2,6 +2,8 @@
 
 **APReL** is a unified Python3 library for active preference-based reward learning methods. It offers a modular framework for experimenting with and implementing preference-based reward learning techniques; which include active querying, multimodal learning, and batch generation methods.
 
+Not sure what preference-based learning means? Read on or check [our video](video.html) for a simple example.
+
 ## Introduction
 
 As robots enter our daily lives, we want them to act in ways that are aligned with our preferences, and goals. Learning a reward function that captures human preferences about how a robot should operate is a fundamental robot learning problem that is the core of the algorithms presented with **APReL**.

@@ -6,8 +6,16 @@ APReL: A Library for Active Preference-based Reward Learning Algorithms
   :target: http://aprel.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
 
++----------------------------------------------------------------------------+------------------------------------------------------------+-----------------------------------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
+| `Paper <https://iliad.stanford.edu/pdfs/publications/biyik2021aprel.pdf>`_ | `Documentations <https://aprel.readthedocs.io/en/latest>`_ | `Video <https://youtu.be/HvwlBNy3l40>`_ | `Installation <https://aprel.readthedocs.io/en/latest/installation.html>`_ | `Example <https://aprel.readthedocs.io/en/latest/example.html>`_ |
++----------------------------------------------------------------------------+------------------------------------------------------------+-----------------------------------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
+
 **APReL** is a unified Python3 library for active preference-based reward learning methods. It offers a modular framework for experimenting with and implementing preference-based reward learning techniques; which include active querying, multimodal learning, and batch generation methods.
 
+.. raw:: html
+
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/HvwlBNy3l40" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    
 
 Installation
 ########
@@ -151,11 +159,11 @@ Let's now define the optimizer which will optimize the queries by considering tr
     query_optimizer = aprel.QueryOptimizerDiscreteTrajectorySet(trajectory_set)
 
 
-**APReL** allows both simulated and real humans. In this example, we will assume a real human is going to respond to the queries. Next, we define this such that there will be a one-second delay time after each trajectory visualization during querying.
+**APReL** allows both simulated and real humans. In this example, we will assume a real human is going to respond to the queries. Next, we define this such that there will be a 0.5 seconds delay time after each trajectory visualization during querying.
 
 .. code-block:: python
 
-    true_user = aprel.HumanUser(delay=1.0)
+    true_user = aprel.HumanUser(delay=0.5)
 
 
 We will learn a reward function that is linear in trajectory features by assuming a softmax human response model.
