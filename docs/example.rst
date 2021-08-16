@@ -153,6 +153,6 @@ Although this is not a part of **APReL**, we trained a reinforcement learning ag
   :width: 50%
   :alt: A MountainCar trajectory where the agent succeeds
   
-Only after 10 queries, we were able to learn a reward function that solves the game! Note that the agent also makes sure to go as back as possible because of the way we designed the features. Can you come up with a better feature function?
+Only after 10 queries, we were able to learn a reward function that solves the game! Note that the agent also makes sure to go as back as possible because of the way we designed the features.
 
 Interested in learning other options and features of **APReL**? Take a look at a more advanced example at: `examples/advanced.py <https://github.com/Stanford-ILIAD/APReL/blob/main/examples/advanced.py>`_!
