@@ -18,6 +18,7 @@ Not sure what preference-based learning means? Read on or check `our video <vide
    installation
    example
    video
+   Paper <https://arxiv.org/abs/2108.07259>
 
 .. toctree::
    :maxdepth: 4

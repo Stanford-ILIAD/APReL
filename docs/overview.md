@@ -48,12 +48,12 @@ After (or during) learning, it is often desired to assess the quality of the lea
 
 
 ## Citations
-Please cite [APReL](http://github.com/Stanford-ILIAD/APReL) if you use this library in your publications:
+Please cite [APReL](https://arxiv.org/abs/2108.07259) if you use this library in your publications:
 ```
-@inproceedings{biyik2021aprel,
+@article{biyik2021aprel,
   title={APReL: A Library for Active Preference-based Reward Learning Algorithms},
-  author={Erdem Biyik and Aditi Talati and Dorsa Sadigh},
-  booktitle={Submitted to Artificial Intelligence for Human-Robot Interaction (AI-HRI) at AAAI Fall Symposium Series},
+  author={B{\i}y{\i}k, Erdem and Talati, Aditi and Sadigh, Dorsa},
+  journal={arXiv preprint arXiv:2108.07259},
   year={2021}
 }
 ```
