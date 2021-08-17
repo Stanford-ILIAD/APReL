@@ -6,9 +6,9 @@ APReL: A Library for Active Preference-based Reward Learning Algorithms
   :target: http://aprel.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
 
-+----------------------------------------------------------------------------+------------------------------------------------------------+-----------------------------------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
-| `Paper <https://iliad.stanford.edu/pdfs/publications/biyik2021aprel.pdf>`_ | `Documentations <https://aprel.readthedocs.io/en/latest>`_ | `Video <https://youtu.be/HvwlBNy3l40>`_ | `Installation <https://aprel.readthedocs.io/en/latest/installation.html>`_ | `Example <https://aprel.readthedocs.io/en/latest/example.html>`_ |
-+----------------------------------------------------------------------------+------------------------------------------------------------+-----------------------------------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
++---------------------------------------------+------------------------------------------------------------+-----------------------------------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
+| `Paper <https://arxiv.org/abs/2108.07259>`_ | `Documentations <https://aprel.readthedocs.io/en/latest>`_ | `Video <https://youtu.be/HvwlBNy3l40>`_ | `Installation <https://aprel.readthedocs.io/en/latest/installation.html>`_ | `Example <https://aprel.readthedocs.io/en/latest/example.html>`_ |
++---------------------------------------------+------------------------------------------------------------+-----------------------------------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
 
 **APReL** is a unified Python3 library for active preference-based reward learning methods. It offers a modular framework for experimenting with and implementing preference-based reward learning techniques; which include active querying, multimodal learning, and batch generation methods.
    
@@ -67,8 +67,7 @@ If you are using a Mac, you can use `Homebrew <https://brew.sh/>`_ to install it
 
 .. code-block:: sh
 
-   cd examples
-   python simple.py
+   python examples/simple.py
 
 
 You should be able to see the `MountainCarContinuous-v0 <https://gym.openai.com/envs/MountainCarContinuous-v0/>`_ environment rendering multiple times.

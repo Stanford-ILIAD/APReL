@@ -52,8 +52,7 @@ If you are using a Mac, you can use `Homebrew <https://brew.sh/>`_ to install it
 
 .. code-block:: sh
 
-   cd examples
-   python simple.py
+   python examples/python simple.py
 
 
 You should be able to see the `MountainCarContinuous-v0 <https://gym.openai.com/envs/MountainCarContinuous-v0/>`_ environment rendering multiple times.
