@@ -8,7 +8,7 @@ from scipy.spatial import ConvexHull
 import warnings
 
 from aprel.basics import Trajectory, TrajectorySet
-from aprel.learning import Belief, SamplingBasedBelief, User
+from aprel.learning import Belief, SamplingBasedBelief, User, SoftmaxUser
 from aprel.learning import Query, PreferenceQuery, WeakComparisonQuery, FullRankingQuery
 from aprel.querying import mutual_information, volume_removal, disagreement, regret, random, thompson
 from aprel.utils import kMedoids, dpp_mode, default_query_distance
@@ -194,6 +194,9 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
                 
             elif acquisition_func is thompson and isinstance(belief, SamplingBasedBelief):
                 subsets = np.array([list(tup) for tup in itertools.combinations(np.arange(belief.num_samples), initial_query.K)])
+                if len(subsets) < batch_size:
+                    batch_size = len(subsets)
+                    warnings.warn('The number of possible queries is smaller than the batch size. Automatically reducing the batch size.')
                 temp_user = belief.user_model.copy()
                 planned_traj_ids = []
                 for sample in belief.samples:
@@ -220,6 +223,9 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
 
             elif acquisition_func is mutual_information or acquisition_func is volume_removal:
                 subsets = np.array([list(tup) for tup in itertools.combinations(np.arange(self.trajectory_set.size), initial_query.K)])
+                if len(subsets) < batch_size:
+                    batch_size = len(subsets)
+                    warnings.warn('The number of possible queries is smaller than the batch size. Automatically reducing the batch size.')
                 vals = []
                 for ids in subsets:
                     curr_query = initial_query.copy()
@@ -236,6 +242,9 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
             elif acquisition_func is disagreement and isinstance(belief, SamplingBasedBelief):
                 assert(initial_query.K == 2), 'disagreement acquisition function works only with pairwise comparison queries, i.e., K must be 2.'
                 subsets = np.array([list(tup) for tup in itertools.combinations(np.arange(belief.num_samples), initial_query.K)])
+                if len(subsets) < batch_size:
+                    batch_size = len(subsets)
+                    warnings.warn('The number of possible queries is smaller than the batch size. Automatically reducing the batch size.')
                 vals = []
                 belief_samples = np.array(belief.samples)
                 belief_logprobs = np.array(belief.logprobs)
@@ -258,6 +267,9 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
             elif acquisition_func is regret and isinstance(belief, SamplingBasedBelief):
                 assert(initial_query.K == 2), 'regret acquisition function works only with pairwise comparison queries, i.e., K must be 2.'
                 subsets = np.array([list(tup) for tup in itertools.combinations(np.arange(belief.num_samples), initial_query.K)])
+                if len(subsets) < batch_size:
+                    batch_size = len(subsets)
+                    warnings.warn('The number of possible queries is smaller than the batch size. Automatically reducing the batch size.')
                 temp_user = belief.user_model.copy()
                 trajectories = []
                 for sample in belief.samples:
@@ -314,6 +326,13 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
         del kwargs['reduced_size']
         distances = kwargs['distance'](top_queries, **kwargs)
         medoid_ids = kMedoids(distances, batch_size)
+        if len(medoid_ids) < batch_size:
+            # There were too many duplicate points, so we ended up with fewer medoids than we needed.
+            remaining_ids = np.setdiff1d(np.arange(len(vals)), medoid_ids)
+            remaining_vals = vals[remaining_ids]
+            missing_count = batch_size - len(medoid_ids)
+            ids_to_add = remaining_ids[np.argpartition(remaining_vals, -missing_count)[-missing_count:]]
+            medoid_ids = np.concatenate((medoid_ids, ids_to_add))
         return [top_queries[idx] for idx in medoid_ids], vals[medoid_ids]
         
     def boundary_medoids_batch(self,
@@ -362,7 +381,7 @@ class QueryOptimizerDiscreteTrajectorySet(QueryOptimizer):
             remaining_vals = vals[remaining_ids]
             missing_count = batch_size - len(simplices)
             ids_to_add = remaining_ids[np.argpartition(remaining_vals, -missing_count)[-missing_count:]]
-            medoid_ids = np.concatenate(medoid_ids, ids_to_add)
+            medoid_ids = np.concatenate((medoid_ids, ids_to_add))
         else:
             # Otherwise, select the medoids among the boundary queries
             distances = kwargs['distance']([top_queries[i] for i in simplices], **kwargs)

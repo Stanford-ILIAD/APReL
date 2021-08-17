@@ -42,8 +42,7 @@ def kMedoids(D: np.array, k: int, tmax: int = 100) -> np.array:
     valid_medoid_inds = list(valid_medoid_inds - invalid_medoid_inds)
 
     if k > len(valid_medoid_inds):
-        raise Exception('too many medoids (after removing {} duplicate points)'.format(
-            len(invalid_medoid_inds)))
+        return valid_medoid_inds
 
     # randomly initialize an array of k medoid indices
     M = np.array(valid_medoid_inds)

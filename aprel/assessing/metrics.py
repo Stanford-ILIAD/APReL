@@ -17,6 +17,6 @@ def cosine_similarity(belief: LinearRewardBelief, true_user: User) -> float:
         float: the cosine similarity of the predicted weights and the true weights
 
     """
-    weightshat = belief.mean['weights']
+    weightshat = np.array([sample['weights'] for sample in belief.samples])
     weights = true_user.params['weights']
-    return np.dot(weights, weightshat) / (np.linalg.norm(weights) * np.linalg.norm(weightshat))
+    return np.mean(np.dot(weightshat, weights) / (np.linalg.norm(weights) * np.linalg.norm(weightshat, axis=1)))
