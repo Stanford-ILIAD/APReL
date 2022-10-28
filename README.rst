@@ -95,7 +95,7 @@ In this example, we will be using the `MountainCarContinuous-v0 <https://gym.ope
     env_name = 'MountainCarContinuous-v0'
     gym_env = gym.make(env_name)
     np.random.seed(0)
-    env.seed(0)
+    gym_env.seed(0)
 
 
 The original goal in `MountainCarContinuous-v0 <https://gym.openai.com/envs/MountainCarContinuous-v0/>`_ is to move the car such that it reaches the yellow flag.
@@ -183,7 +183,7 @@ If we wanted to learn the other parameters of the softmax model, we would pass t
     
 Running the above code should print an estimate for the weights. Since we have not provided any data yet, this estimate is not meaningful.
 We need to query the user to elicit their preferences.
-For this, we will first start a dummy query. The query optimizer will then optimize a query of the same kind.
+For this, we will first initialize a dummy query. The query optimizer will then optimize a query of the same kind.
 For example, let's create a dummy preference query (*do you prefer trajectory A or B?* kind of query) with the first two trajectories in the trajectory set:
 
 .. code-block:: python
