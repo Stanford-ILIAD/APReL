@@ -1,5 +1,5 @@
 numpy>=1.8.0
 moviepy>=1.0.0
 scipy
-gym
+gym==0.25
 pygame
